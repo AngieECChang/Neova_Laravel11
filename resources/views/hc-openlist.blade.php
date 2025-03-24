@@ -216,6 +216,24 @@
   });
 });
 
+function convertYearDropdownToROC(inst) {
+  // 找出 select 元件
+  setTimeout(function () {
+    const yearSelect = $(inst.dpDiv).find(".ui-datepicker-year");
+
+    yearSelect.children("option").each(function () {
+      const adYear = parseInt($(this).val());
+      const rocYear = adYear - 1911;
+      $(this).text(rocYear); // 顯示民國年
+    });
+  }, 0);
+}
+
+function isValidTaiwanID(id) {
+  const regex = /^[A-Z]{1}[A-Z0-9]{1}\d{8}$/;
+  return regex.test(id.toUpperCase());
+}
+
 $(document).ready(function() {
   // 點擊「編輯」按鈕時，填入對應資料
   $(".edit-btn").click(function() {
@@ -255,12 +273,13 @@ $(document).ready(function() {
       }
     });
   });
+
   let today = new Date();
-  let rocYear = today.getFullYear() - 1911; // 取得民國年
-  let maxROCYear = rocYear + 3; // 最大年份 = 今年 + 3 年
-  $("#roc_date").datepicker({
+  let thisadYear = today.getFullYear(); // 取得民國年
+  let maxadYear = thisadYear + 3; // 最大年份 = 今年 + 3 年
+  $("#newCaseBD").datepicker({
     dateFormat: "yy/mm/dd", // yy 會解釋為 2 位數年份，但我們會手動轉換
-    yearRange: "10:"+maxROCYear,
+    yearRange: "1911:"+maxadYear,
     changeMonth: true,
     changeYear: true,
     defaultDate: new Date(), // 預設為今天
@@ -270,20 +289,28 @@ $(document).ready(function() {
                       "7月", "8月", "9月", "10月", "11月", "12月"],
     dayNamesMin: ["日", "一", "二", "三", "四", "五", "六"], // 國字星期
     beforeShow: function (input, inst) {
-      let date = $(input).val();
-      if (date.match(/^(\d{2,3})\/(\d{1,2})\/(\d{1,2})$/)) {
-        let parts = date.split('/');
-        let year = parseInt(parts[0]) + 1911; // 轉換成西元年
-        $(input).val(year + '/' + parts[1] + '/' + parts[2]);
-      } else {
-        let today = new Date();
-        let rocYear = today.getFullYear() - 1911;
-        let defaultDate = rocYear + '/' + (today.getMonth() + 1) + '/' + today.getDate();
-        $(input).val(defaultDate); // 預設顯示民國年日期
-      }
+      // let date = $(input).val();
+      // console.log("date ="+date);
+      // if (date.match(/^(\d{2,3})\/(\d{1,2})\/(\d{1,2})$/)) {
+      //   console.log("2");
+      //   let parts = date.split('/');
+      //   let year = parseInt(parts[0]) - 1911; // 轉換成西元年
+      //   $(input).val(year + '/' + parts[1] + '/' + parts[2]);
+      // } else {
+      //   console.log("3");
+      //   let today = new Date();
+      //   let rocYear = today.getFullYear() - 1911;
+      //   console.log("today="+today);
+      //   console.log("rocYear="+rocYear);
+      //   let defaultDate = rocYear + '/' + (today.getMonth() + 1) + '/' + today.getDate();
+      //   $(input).val(defaultDate); // 預設顯示民國年日期
+      // }
+      convertYearDropdownToROC(inst);
     },
     onSelect: function (dateText, inst) {
+      // console.log("dateText="+dateText);
       if (dateText.match(/^(\d{4})\/(\d{1,2})\/(\d{1,2})$/)) {
+        // console.log("4");
         let parts = dateText.split('/');
         let year = parseInt(parts[0]) - 1911; // 轉換回民國年
         $(this).val(year + '/' + parts[1] + '/' + parts[2]);
@@ -295,39 +322,91 @@ $(document).ready(function() {
         let year = parseInt(parts[0]) - 1911; // 轉換回民國年
         $(this).val(year + '/' + parts[1] + '/' + parts[2]);
       }
+    },
+    onChangeMonthYear: function (year, month, inst) {
+      convertYearDropdownToROC(inst);
     }
   });
 
+  $("#newCaseDate").datepicker({
+    dateFormat: "yy-mm-dd",
+    changeMonth: true,
+    changeYear: true,
+    defaultDate: new Date(),
+    // showButtonPanel: true,
+    monthNames: ["一月", "二月", "三月", "四月", "五月", "六月",
+                 "七月", "八月", "九月", "十月", "十一月", "十二月"], // 國字月份
+    monthNamesShort: ["1月", "2月", "3月", "4月", "5月", "6月",
+                      "7月", "8月", "9月", "10月", "11月", "12月"],
+    dayNamesMin: ["日", "一", "二", "三", "四", "五", "六"], // 國字星期
+  });
+
   $("#newcaseForm").submit(function(e) {
-    e.preventDefault();
+    e.preventDefault(); // 阻止表單送出
 
-    let formData = {
-      _token: $("input[name=_token]").val(),
-      name: $("#newCaseName").val(),
-      id_number: $("#newCaseID").val(),
-      birthday: $("#roc_date").val(), // 民國年 (112/03/18)
-      case_type: $("#newCaseType").val(),
-      case_no: $("#newCaseNo").val(),
-    };
-
+    let idNumber = $("#newCaseID").val();
+    if (!isValidTaiwanID(idNumber)) {
+      alert("身分證格式錯誤！");
+      return;
+    }
+    // 🔍 先 AJAX 查詢是否已存在
     $.ajax({
-      url: "/new-case",
+      url: "/check-id-number",
       type: "POST",
-      data: formData,
+      data: {
+        _token: $("input[name=_token]").val(),
+        id_number: idNumber
+      },
       dataType: "json",
-      success: function (response) {
-        if (response.success) {
-          alert("個案新增成功！");
-          location.reload(); // 重新整理頁面
+      success: function(response) {
+        console.log("檢查結果：", response);
+        if (response.exists) {
+          alert("此身分證字號已存在，請勿重複新增！");
+          return;
         } else {
-          alert("錯誤：" + response.message);
+          // 身分證沒有重複，繼續送出表單
+          submitNewCase(); // 把表單送出的邏輯抽成一個函式
         }
       },
-      error: function (xhr) {
-        alert("提交失敗，請檢查輸入資料！");
+      error: function() {
+        alert("檢查身分證時發生錯誤，請稍後再試！");
       }
     });
   });
 });
+// 表單送出邏輯抽成函式
+function submitNewCase() {
+  let formData = {
+    _token: $("input[name=_token]").val(),
+    name: $("#newCaseName").val(),
+    gender: $("#newCaseGender").val(),
+    id_number: $("#newCaseID").val(),
+    birthday: $("#newCaseBD").val(),
+    case_type: $("#newCaseType").val(),
+    case_no: $("#newCaseNo").val(),
+    area: $("#newCaseArea").val(),
+    open_date: $("#newCaseDate").val()
+  };
+
+  $.ajax({
+    url: "/new-case",
+    type: "POST",
+    data: formData,
+    dataType: "json",
+    success: function (response) {
+      if (response.success) {
+        alert("個案新增成功！");
+        // location.reload(); // 重新整理頁面
+      } else {
+        alert("錯誤：" + response.message);
+      }
+    },
+    error: function (xhr) {
+      alert("提交失敗，請檢查輸入資料！");
+    }
+  });
+}
+
+
 </script>
 @endsection

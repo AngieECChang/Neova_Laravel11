@@ -16,14 +16,20 @@ class HCListController extends Controller
     $region = $request->input('region');
 
     // 取得所有區域名稱 (不重複)
+    // $areaNames = $db->table('area_info')
+    // ->select('areaName')
+    // ->distinct()
+    // ->orderBy('area_order')
+    // ->pluck('areaName'); // 取得純陣列格式
+
     $areaNames = $db->table('area_info')
-    ->select('areaName')
+    ->select('areaID', 'areaName')
     ->distinct()
     ->orderBy('area_order')
-    ->pluck('areaName'); // 取得純陣列格式
+    ->pluck('areaName', 'areaID');
 
     $open_cases_query  = $db->table('case_open as a')
-      ->leftJoin('case as b', 'a.caseID', '=', 'b.caseID')
+      ->leftJoin('cases as b', 'a.caseID', '=', 'b.caseID')
       ->join('bed_info as c', 'a.bedID', '=', 'c.bedID')
       ->join('area_info as d', 'c.areaID', '=', 'd.areaID')
       ->select(
@@ -55,7 +61,7 @@ class HCListController extends Controller
     $db = DatabaseConnectionService::setConnection($databaseName);
 
     $close_cases = $db->table('case_closed as a')
-      ->leftJoin('case as b', 'a.caseID', '=', 'b.caseID')
+      ->leftJoin('cases as b', 'a.caseID', '=', 'b.caseID')
       ->select(
         'a.*',
         'b.*'
