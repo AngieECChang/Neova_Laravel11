@@ -36,6 +36,7 @@ class HCListController extends Controller
         'a.*',
         'b.*',
         'c.RP_user_id',
+        'd.areaID',
         'd.areaName'
       )
       ->orderByRaw('CAST(b.case_type AS UNSIGNED)') // 強制轉數字排序

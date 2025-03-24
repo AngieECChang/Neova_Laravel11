@@ -169,4 +169,41 @@ class CaseController extends Controller
       return response()->json(['success' => false,'message' => '伺服器錯誤：' . $e->getMessage()], 500);
     }
   }
+
+  public function case_close(Request $request, $id)
+  {
+    try {
+      $databaseName = session('DB'); // 可根據條件動態變更
+      $db = DatabaseConnectionService::setConnection($databaseName);
+
+      $db->table('case_closed')->insert([
+        'caseID' => $id,
+        'open_date' => $request->input('opendate'),
+        'close_date' => $request->input('closeDate'),
+        'reason' => $request->input('closeReason'), 
+        'memo' => $request->input('closeReasonOther'),
+        'areaID' => $request->input('caseArea'),
+        'bedID' => $id,
+        'type' => $request->input('caseType'),
+        'user' => session('user_id')
+      ]);
+
+      $db->table('case_open')
+        ->where([
+          ['caseID', '=', $id],
+          ['open_date', '=', $request->input('opendate')]
+        ])
+        ->delete();
+
+      $db->table('bed_info')
+        ->where('bedID', $id)
+        ->delete();
+
+      return response()->json(['success' => true]);
+    }
+    catch (\Exception $e) {
+      \Log::error('個案結案失敗：' . $e->getMessage());
+      return response()->json(['success' => false, 'message' => $e->getMessage()]);
+    }
+  }
 }

@@ -8,6 +8,7 @@
 @php
   $patient_type = config('public.hc_patient_type');
   $gender = config('public.gender');
+  $close_reason = config('public.hc_close_reason');
 @endphp
 <div class="row align-items-center mb-4">
   <div class="col-3">
@@ -16,7 +17,7 @@
   <div class="col-9">
     <form method="GET" action="{{ route('hc-openlist') }}" class="d-flex align-items-center justify-content-end" id="regionForm">
       <label for="region" class="visually-hidden">區域：</label>
-      <select name="region" id="region" class="form-control me-2" style="width:160px" onchange="document.getElementById('regionForm').submit();">
+      <select name="region" id="region" class="form-control me-2" style="width:160px" onchange="document.getElementById('regionForm').submit();" autocomplete="off">
         <option value="">全部</option>
         @foreach ($areaNames as $area)
           <option value="{{ $area }}" {{ request('region') == $area ? 'selected' : '' }}>
@@ -64,7 +65,7 @@
         <h1 class="h3 text-gray-800 mb-0"></h1>
       </div>
       <div class="col-9 d-flex justify-content-end">
-        <input type="text" id="tableSearch" class="form-control" placeholder="🔍 搜尋..." style="width: 150px;">
+        <input type="text" class="form-control tableSearch" placeholder="🔍 搜尋..." style="width: 150px;">
       </div>
     </div>
       <div class="card shadow-sm mb-4">
@@ -95,9 +96,12 @@
                       <td class="text-center">{{ $patient_type[$caseType] ?? '未知類型' }}</td>
                       <td class="text-center">{{ $case->open_date }}</td>
                       <td>
-                        <button class="btn btn-sm btn-warning edit-btn" data-id="{{ $case->caseID }}" data-caseno="{{ (string)$case->caseNoDisplay }}" data-type="{{ $case->case_type }}" data-casename="{{ $case->name }}" data-bs-toggle="modal" data-bs-target="#editcaseModal">
-                          <i class="bi bi-pencil-square"></i>修改案號、類型
+                        <button class="btn btn-sm btn-success edit-btn" style="font-size: 1.1rem !important;" data-id="{{ $case->caseID }}" data-caseno="{{ (string)$case->caseNoDisplay }}" data-type="{{ $case->case_type }}" data-casename="{{ $case->name }}" data-bs-toggle="modal" data-bs-target="#editcaseModal">
+                          <i class="bi bi-pencil-square"></i>&nbsp;修改案號、類型
                         </button>
+                        <button class="btn btn-sm close-btn" style="background-color:#e83e8c;color: #ffffff;font-size: 1.1rem !important;" data-caseno="{{ (string)$case->caseNoDisplay }}" data-id="{{ $case->caseID }}" data-opendate="{{ $case->open_date }}" data-type="{{ $case->case_type }}" data-area="{{ $case->areaID }}" data-casename="{{ $case->name }}" data-bs-toggle="modal" data-bs-target="#closecaseModal">
+                        <i class="bi bi-person-x"></i>&nbsp;結案
+                      </button>
                       </td>
                     </tr>
                   @endforeach
@@ -122,7 +126,7 @@
         <h1 class="h3 text-gray-800 mb-0"></h1>
       </div>
       <div class="col-9 d-flex justify-content-end">
-        <input type="text" id="tableSearch" class="form-control" placeholder="🔍 搜尋..." style="width: 150px;">
+        <input type="text" class="form-control tableSearch" placeholder="🔍 搜尋..." style="width: 150px;">
       </div>
     </div>
       <div class="card shadow-sm mb-4">
@@ -150,8 +154,11 @@
                     <td class="text-center">{!! $gender[$case->gender] ?? '' !!}</td>
                     <td class="text-center">{{ $case->open_date }}</td>
                     <td>
-                      <button class="btn btn-sm btn-warning edit-btn" data-id="{{ $case->caseID }}" data-caseno="{{ (string)$case->caseNoDisplay }}" data-type="{{ $case->case_type }}" data-casename="{{ $case->name }}" data-bs-toggle="modal" data-bs-target="#editcaseModal">
-                        <i class="bi bi-pencil-square"></i>修改案號、類型
+                      <button class="btn btn-sm btn-success edit-btn" style="font-size: 1.1rem !important;" data-id="{{ $case->caseID }}" data-caseno="{{ (string)$case->caseNoDisplay }}" data-type="{{ $case->case_type }}" data-casename="{{ $case->name }}" data-bs-toggle="modal" data-bs-target="#editcaseModal">
+                        <i class="bi bi-pencil-square"></i>&nbsp;修改案號、類型
+                      </button>
+                      <button class="btn btn-sm close-btn" style="background-color:#e83e8c;color: #ffffff;font-size: 1.1rem !important;" data-caseno="{{ (string)$case->caseNoDisplay }}" data-id="{{ $case->caseID }}" data-opendate="{{ $case->open_date }}" data-type="{{ $case->case_type }}" data-area="{{ $case->areaID }}" data-casename="{{ $case->name }}" data-bs-toggle="modal" data-bs-target="#closecaseModal">
+                        <i class="bi bi-person-x"></i>&nbsp;結案
                       </button>
                     </td>
                   </tr>
@@ -201,17 +208,20 @@
   </div>
 </div>
 @include('newcase')
+@include('closecase')
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
-  document.getElementById('tableSearch').addEventListener('keyup', function() {
-  let filter = this.value.toLowerCase();
-  let tables = document.querySelectorAll(".searchable-table");
+  document.querySelectorAll('.tableSearch').forEach(function(input) {
+  input.addEventListener('keyup', function() {
+    let filter = this.value.toLowerCase();
+    let tables = document.querySelectorAll(".searchable-table");
 
-  tables.forEach(table => {
-    let rows = table.querySelectorAll("tbody tr");
-    rows.forEach(row => {
-      let text = row.innerText.toLowerCase();
-      row.style.display = text.includes(filter) ? "" : "none";
+    tables.forEach(table => {
+      let rows = table.querySelectorAll("tbody tr");
+      rows.forEach(row => {
+        let text = row.innerText.toLowerCase();
+        row.style.display = text.includes(filter) ? "" : "none";
+      });
     });
   });
 });
@@ -289,22 +299,6 @@ $(document).ready(function() {
                       "7月", "8月", "9月", "10月", "11月", "12月"],
     dayNamesMin: ["日", "一", "二", "三", "四", "五", "六"], // 國字星期
     beforeShow: function (input, inst) {
-      // let date = $(input).val();
-      // console.log("date ="+date);
-      // if (date.match(/^(\d{2,3})\/(\d{1,2})\/(\d{1,2})$/)) {
-      //   console.log("2");
-      //   let parts = date.split('/');
-      //   let year = parseInt(parts[0]) - 1911; // 轉換成西元年
-      //   $(input).val(year + '/' + parts[1] + '/' + parts[2]);
-      // } else {
-      //   console.log("3");
-      //   let today = new Date();
-      //   let rocYear = today.getFullYear() - 1911;
-      //   console.log("today="+today);
-      //   console.log("rocYear="+rocYear);
-      //   let defaultDate = rocYear + '/' + (today.getMonth() + 1) + '/' + today.getDate();
-      //   $(input).val(defaultDate); // 預設顯示民國年日期
-      // }
       convertYearDropdownToROC(inst);
     },
     onSelect: function (dateText, inst) {
@@ -340,7 +334,7 @@ $(document).ready(function() {
                       "7月", "8月", "9月", "10月", "11月", "12月"],
     dayNamesMin: ["日", "一", "二", "三", "四", "五", "六"], // 國字星期
   });
-
+  
   $("#newcaseForm").submit(function(e) {
     e.preventDefault(); // 阻止表單送出
 
@@ -373,6 +367,77 @@ $(document).ready(function() {
       }
     });
   });
+
+  $(".close-btn").click(function() {
+    $("#closeCaseId").val($(this).data("id"));
+    $("#closeCaseInfo").html("【"+$(this).data("casename")+" "+$(this).data("caseno")+"】");
+    $("#opendate").val($(this).data("opendate"));
+    $("#caseType").val($(this).data("type"));
+    $("#caseArea").val($(this).data("area"));
+    $("#closeCaseNo").val($(this).data("caseno"));
+  });
+  
+  $("#closeDate").datepicker({
+    dateFormat: "yy-mm-dd",
+    changeMonth: true,
+    changeYear: true,
+    defaultDate: new Date(),
+    // showButtonPanel: true,
+    monthNames: ["一月", "二月", "三月", "四月", "五月", "六月",
+                 "七月", "八月", "九月", "十月", "十一月", "十二月"], // 國字月份
+    monthNamesShort: ["1月", "2月", "3月", "4月", "5月", "6月",
+                      "7月", "8月", "9月", "10月", "11月", "12月"],
+    dayNamesMin: ["日", "一", "二", "三", "四", "五", "六"], // 國字星期
+  });
+
+  $('#closeReason').select2({
+    placeholder: "請選擇結案原因",
+    dropdownParent: $('#closecaseModal'), // 指定容器，防止被 Bootstrap Modal 蓋住
+    width: '100%'  // 確保寬度正常
+  });
+
+  $('#closeReason').on('change', function () {
+    const selectedText = $('#closeReason option:selected').text();
+    if (selectedText === '其他') {
+      $('#closeReasonOther').show();
+    } else {
+      $('#closeReasonOther').hide().val('');
+    }
+  });
+
+  $("#closeForm").submit(function(e) {
+    e.preventDefault();
+
+    let formData = {
+      _token: $("input[name=_token]").val(),
+      caseId: $("#closeCaseId").val(),
+      closeDate: $("#closeDate").val(),
+      closeReason: $("#closeReason").val(),
+      closeReasonOther: $("#closeReasonOther").val(),
+      closefiller: $("#closefiller").val(),
+      opendate: $("#opendate").val(),
+      caseType: $("#caseType").val(),
+      caseArea: $("#caseArea").val()
+    };
+   
+    $.ajax({
+      url: "/close-case/" + $("#closeCaseId").val(),
+      method: "POST",
+      data: formData,
+      dataType: "json",
+      success: function(response) {
+        if (response.success) {
+          alert("結案成功！");
+          location.reload();
+        } else {
+          alert("結案失敗！");
+        }
+      },
+      error: function() {
+        alert("結案失敗！");
+      }
+    });
+  });
 });
 // 表單送出邏輯抽成函式
 function submitNewCase() {
@@ -396,7 +461,7 @@ function submitNewCase() {
     success: function (response) {
       if (response.success) {
         alert("個案新增成功！");
-        // location.reload(); // 重新整理頁面
+        location.reload(); // 重新整理頁面
       } else {
         alert("錯誤：" + response.message);
       }

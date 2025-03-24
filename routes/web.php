@@ -33,7 +33,7 @@ Route::middleware(['auth.session'])->group(function () {
   Route::put('/update-case/{id}', [CaseController::class, 'case_update']);
   Route::post('/new-case', [CaseController::class, 'case_new'])->name('hc-case_new');
   Route::post('/check-id-number', [CaseController::class, 'checkIdNumber'])->name('check-id-number');
-
+  Route::post('/close-case/{id}', [CaseController::class, 'case_close'])->name('hc-case_close');
 });
 
 
