@@ -26,9 +26,6 @@
         @endforeach
       </select> 
       <div style="padding-left:10px">
-        {{-- <button class="btn btn-sm btn-warning edit-btn" data-id="{{ $case->caseID }}" data-caseno="{{ (string)$case->caseNoDisplay }}" data-type="{{ $case->case_type }}" data-casename="{{ $case->name }}" data-bs-toggle="modal" data-bs-target="#newcaseModal">
-          <i class="bi bi-pencil-square"></i>修改案號、類型
-        </button> --}}
         <a href="{{ route('hc-create') }}" class="btn text-white" style="background-color: orange;" data-bs-toggle="modal" data-bs-target="#newcaseModal">新增個案</a>
       </div>
     </form>
@@ -96,8 +93,11 @@
                       <td class="text-center">{{ $patient_type[$caseType] ?? '未知類型' }}</td>
                       <td class="text-center">{{ $case->open_date }}</td>
                       <td>
-                        <button class="btn btn-sm btn-success edit-btn" style="font-size: 1.1rem !important;" data-id="{{ $case->caseID }}" data-caseno="{{ (string)$case->caseNoDisplay }}" data-type="{{ $case->case_type }}" data-casename="{{ $case->name }}" data-bs-toggle="modal" data-bs-target="#editcaseModal">
+                        <button class="btn btn-sm btn-success edit-type-btn" style="font-size: 1.1rem !important;" data-id="{{ $case->caseID }}" data-caseno="{{ (string)$case->caseNoDisplay }}" data-type="{{ $case->case_type }}" data-casename="{{ $case->name }}" data-bs-toggle="modal" data-bs-target="#editcaseModal">
                           <i class="bi bi-pencil-square"></i>&nbsp;修改案號、類型
+                        </button>
+                        <button class="btn btn-sm btn-primary edit-area-btn" style="font-size: 1.1rem !important;" data-id="{{ $case->caseID }}" data-caseno="{{ (string)$case->caseNoDisplay }}" data-type="{{ $case->case_type }}" data-casename="{{ $case->name }}" data-area="{{ $case->areaID }}" data-bed="{{ $case->bedID }}" data-bs-toggle="modal" data-bs-target="#editareaModal">
+                          <i class="bi bi-pencil-square"></i>&nbsp;變更區域
                         </button>
                         <button class="btn btn-sm close-btn" style="background-color:#e83e8c;color: #ffffff;font-size: 1.1rem !important;" data-caseno="{{ (string)$case->caseNoDisplay }}" data-id="{{ $case->caseID }}" data-opendate="{{ $case->open_date }}" data-type="{{ $case->case_type }}" data-area="{{ $case->areaID }}" data-casename="{{ $case->name }}" data-bs-toggle="modal" data-bs-target="#closecaseModal">
                         <i class="bi bi-person-x"></i>&nbsp;結案
@@ -154,8 +154,11 @@
                     <td class="text-center">{!! $gender[$case->gender] ?? '' !!}</td>
                     <td class="text-center">{{ $case->open_date }}</td>
                     <td>
-                      <button class="btn btn-sm btn-success edit-btn" style="font-size: 1.1rem !important;" data-id="{{ $case->caseID }}" data-caseno="{{ (string)$case->caseNoDisplay }}" data-type="{{ $case->case_type }}" data-casename="{{ $case->name }}" data-bs-toggle="modal" data-bs-target="#editcaseModal">
+                      <button class="btn btn-sm btn-success edit-type-btn" style="font-size: 1.1rem !important;" data-id="{{ $case->caseID }}" data-caseno="{{ (string)$case->caseNoDisplay }}" data-type="{{ $case->case_type }}" data-casename="{{ $case->name }}" data-bs-toggle="modal" data-bs-target="#editcaseModal">
                         <i class="bi bi-pencil-square"></i>&nbsp;修改案號、類型
+                      </button>
+                      <button class="btn btn-sm btn-primary edit-area-btn" style="font-size: 1.1rem !important;" data-id="{{ $case->caseID }}" data-caseno="{{ (string)$case->caseNoDisplay }}" data-type="{{ $case->case_type }}" data-casename="{{ $case->name }}" data-area="{{ $case->areaID }}" data-bed="{{ $case->bedID }}" data-bs-toggle="modal" data-bs-target="#editareaModal">
+                        <i class="bi bi-pencil-square"></i>&nbsp;變更區域
                       </button>
                       <button class="btn btn-sm close-btn" style="background-color:#e83e8c;color: #ffffff;font-size: 1.1rem !important;" data-caseno="{{ (string)$case->caseNoDisplay }}" data-id="{{ $case->caseID }}" data-opendate="{{ $case->open_date }}" data-type="{{ $case->case_type }}" data-area="{{ $case->areaID }}" data-casename="{{ $case->name }}" data-bs-toggle="modal" data-bs-target="#closecaseModal">
                         <i class="bi bi-person-x"></i>&nbsp;結案
@@ -207,8 +210,9 @@
     </div>
   </div>
 </div>
-@include('newcase')
-@include('closecase')
+@include('includes.newcase')
+@include('includes.closecase')
+@include('includes.edit-case-area')
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
   document.querySelectorAll('.tableSearch').forEach(function(input) {
@@ -246,7 +250,7 @@ function isValidTaiwanID(id) {
 
 $(document).ready(function() {
   // 點擊「編輯」按鈕時，填入對應資料
-  $(".edit-btn").click(function() {
+  $(".edit-type-btn").click(function() {
     $("#editCaseId").val($(this).data("id"));
     $("#editCaseName").html($(this).data("casename"));
     $("#editCaseNo").val($(this).data("caseno"));
@@ -280,6 +284,47 @@ $(document).ready(function() {
       },
       error: function() {
         alert("修改失敗！");
+      }
+    });
+  });
+
+  $(".edit-area-btn").click(function() {
+    $("#editareaCaseId").val($(this).data("id"));
+    $("#editareaCaseInfo").html("【"+$(this).data("casename")+" "+$(this).data("caseno")+"】");
+    $("#editCaseName").html($(this).data("casename"));
+    $("#editarea").val($(this).data("area"));
+    $("#editarea_original").val($(this).data("area"));
+    $("#editareaBed").val($(this).data("bed"));
+  });
+
+  // 提交表單並更新資料
+  $("#editareaForm").submit(function(e) {
+    e.preventDefault();
+
+    let formData = {
+      _token: $("input[name=_token]").val(),
+      caseId: $("#editareaCaseId").val(),
+      caseBed: $("#editareaBed").val(),
+      caseArea: $("#editarea").val(),
+      caseArea_original: $("#editarea_original").val()
+    };
+
+    $.ajax({
+      url: "/update-area/" + $("#editareaCaseId").val(),
+      method: "PUT",
+      data: formData,
+      dataType: "json",
+      success: function(response) {
+        console.log(response);
+        if (response.success) {
+          alert("修改成功！");
+          // location.reload();
+        } else {
+          alert("修改失敗！"+response.message);
+        }
+      },
+      error: function() {
+        alert("修改失敗！"+response.message);
       }
     });
   });

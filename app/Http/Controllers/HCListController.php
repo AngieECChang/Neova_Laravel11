@@ -35,6 +35,7 @@ class HCListController extends Controller
       ->select(
         'a.*',
         'b.*',
+        'c.bedID',
         'c.RP_user_id',
         'd.areaID',
         'd.areaName'

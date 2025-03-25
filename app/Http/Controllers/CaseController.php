@@ -78,6 +78,44 @@ class CaseController extends Controller
     }
   }
 
+  public function case_update_area(Request $request, $id)
+  {
+    $databaseName = session('DB'); // 可根據條件動態變更
+    $db = DatabaseConnectionService::setConnection($databaseName);
+
+    $bed = $request->input('caseBed');
+    $newArea = $request->input('caseArea');
+    $oldArea = $request->input('caseArea_original');
+
+    if ($newArea == $oldArea) {
+      return response()->json(['success' => false, 'message' => '資料無變更']);
+    }else{
+      
+      $db->table('case_log')
+      ->insert([
+        'caseID' => $id,
+        'date' => now(),
+        'action' => 'update',
+        'function' => 'change_caseArea',
+        'old_value' => $oldArea,
+        'new_value' => $newArea,
+        'filler' => session('user_id')
+      ]);
+
+      $affected = $db->table('bed_info')
+      ->where('bedID', $bed)
+      ->update([
+        'areaID' => $newArea
+      ]);
+  
+      if ($affected) {
+        return response()->json(['success' => true, 'message' => '更新成功']);
+      } else {
+        return response()->json(['success' => false, 'message' => '更新失敗']);
+      }
+    }
+  }
+
   public function case_new(Request $request)
   {
     try {

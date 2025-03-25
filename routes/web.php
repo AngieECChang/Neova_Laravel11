@@ -31,6 +31,7 @@ Route::middleware(['auth.session'])->group(function () {
   Route::get('/hc-create', [HCListController::class, 'HC_Create'])->name('hc-create');
   Route::get('/hc-closelist', [HCListController::class, 'HC_Closelist'])->name('hc-closelist');
   Route::put('/update-case/{id}', [CaseController::class, 'case_update']);
+  Route::put('/update-area/{id}', [CaseController::class, 'case_update_area']);
   Route::post('/new-case', [CaseController::class, 'case_new'])->name('hc-case_new');
   Route::post('/check-id-number', [CaseController::class, 'checkIdNumber'])->name('check-id-number');
   Route::post('/close-case/{id}', [CaseController::class, 'case_close'])->name('hc-case_close');
