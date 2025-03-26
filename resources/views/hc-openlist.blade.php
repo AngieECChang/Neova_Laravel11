@@ -218,7 +218,6 @@
 @include('includes.newcase')
 @include('includes.closecase')
 @include('includes.edit-case-area')
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
   document.querySelectorAll('.tableSearch').forEach(function(input) {
   input.addEventListener('keyup', function() {
