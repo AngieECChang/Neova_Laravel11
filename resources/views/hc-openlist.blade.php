@@ -93,13 +93,13 @@
                       <td class="text-center">{{ $patient_type[$caseType] ?? '未知類型' }}</td>
                       <td class="text-center">{{ $case->open_date }}</td>
                       <td>
-                        <button class="btn btn-sm btn-success edit-type-btn" style="font-size: 1.1rem !important;" data-id="{{ $case->caseID }}" data-caseno="{{ (string)$case->caseNoDisplay }}" data-type="{{ $case->case_type }}" data-casename="{{ $case->name }}" data-bs-toggle="modal" data-bs-target="#editcaseModal">
+                        <button class="btn btn-sm btn-success edit-type-btn" style="font-size: 1rem !important;" data-id="{{ $case->caseID }}" data-caseno="{{ (string)$case->caseNoDisplay }}" data-type="{{ $case->case_type }}" data-casename="{{ $case->name }}" data-bs-toggle="modal" data-bs-target="#editcaseModal">
                           <i class="bi bi-pencil-square"></i>&nbsp;修改案號、類型
                         </button>
-                        <button class="btn btn-sm btn-primary edit-area-btn" style="font-size: 1.1rem !important;" data-id="{{ $case->caseID }}" data-caseno="{{ (string)$case->caseNoDisplay }}" data-type="{{ $case->case_type }}" data-casename="{{ $case->name }}" data-area="{{ $case->areaID }}" data-bed="{{ $case->bedID }}" data-bs-toggle="modal" data-bs-target="#editareaModal">
+                        <button class="btn btn-sm btn-primary edit-area-btn" style="font-size: 1rem !important;" data-id="{{ $case->caseID }}" data-caseno="{{ (string)$case->caseNoDisplay }}" data-type="{{ $case->case_type }}" data-casename="{{ $case->name }}" data-area="{{ $case->areaID }}" data-bed="{{ $case->bedID }}" data-bs-toggle="modal" data-bs-target="#editareaModal">
                           <i class="bi bi-pencil-square"></i>&nbsp;變更區域
                         </button>
-                        <button class="btn btn-sm close-btn" style="background-color:#e83e8c;color: #ffffff;font-size: 1.1rem !important;" data-caseno="{{ (string)$case->caseNoDisplay }}" data-id="{{ $case->caseID }}" data-opendate="{{ $case->open_date }}" data-type="{{ $case->case_type }}" data-area="{{ $case->areaID }}" data-casename="{{ $case->name }}" data-bs-toggle="modal" data-bs-target="#closecaseModal">
+                        <button class="btn btn-sm close-btn" style="background-color:#e83e8c;color: #ffffff;font-size: 1rem !important;" data-caseno="{{ (string)$case->caseNoDisplay }}" data-id="{{ $case->caseID }}" data-opendate="{{ $case->open_date }}" data-type="{{ $case->case_type }}" data-area="{{ $case->areaID }}" data-casename="{{ $case->name }}" data-bs-toggle="modal" data-bs-target="#closecaseModal">
                         <i class="bi bi-person-x"></i>&nbsp;結案
                       </button>
                       </td>
@@ -154,13 +154,13 @@
                     <td class="text-center">{!! $gender[$case->gender] ?? '' !!}</td>
                     <td class="text-center">{{ $case->open_date }}</td>
                     <td>
-                      <button class="btn btn-sm btn-success edit-type-btn" style="font-size: 1.1rem !important;" data-id="{{ $case->caseID }}" data-caseno="{{ (string)$case->caseNoDisplay }}" data-type="{{ $case->case_type }}" data-casename="{{ $case->name }}" data-bs-toggle="modal" data-bs-target="#editcaseModal">
+                      <button class="btn btn-sm btn-success edit-type-btn" style="font-size: 1rem !important;" data-id="{{ $case->caseID }}" data-caseno="{{ (string)$case->caseNoDisplay }}" data-type="{{ $case->case_type }}" data-casename="{{ $case->name }}" data-bs-toggle="modal" data-bs-target="#editcaseModal">
                         <i class="bi bi-pencil-square"></i>&nbsp;修改案號、類型
                       </button>
-                      <button class="btn btn-sm btn-primary edit-area-btn" style="font-size: 1.1rem !important;" data-id="{{ $case->caseID }}" data-caseno="{{ (string)$case->caseNoDisplay }}" data-type="{{ $case->case_type }}" data-casename="{{ $case->name }}" data-area="{{ $case->areaID }}" data-bed="{{ $case->bedID }}" data-bs-toggle="modal" data-bs-target="#editareaModal">
+                      <button class="btn btn-sm btn-primary edit-area-btn" style="font-size: 1rem !important;" data-id="{{ $case->caseID }}" data-caseno="{{ (string)$case->caseNoDisplay }}" data-type="{{ $case->case_type }}" data-casename="{{ $case->name }}" data-area="{{ $case->areaID }}" data-bed="{{ $case->bedID }}" data-bs-toggle="modal" data-bs-target="#editareaModal">
                         <i class="bi bi-pencil-square"></i>&nbsp;變更區域
                       </button>
-                      <button class="btn btn-sm close-btn" style="background-color:#e83e8c;color: #ffffff;font-size: 1.1rem !important;" data-caseno="{{ (string)$case->caseNoDisplay }}" data-id="{{ $case->caseID }}" data-opendate="{{ $case->open_date }}" data-type="{{ $case->case_type }}" data-area="{{ $case->areaID }}" data-casename="{{ $case->name }}" data-bs-toggle="modal" data-bs-target="#closecaseModal">
+                      <button class="btn btn-sm close-btn" style="background-color:#e83e8c;color: #ffffff;font-size: 1rem !important;" data-caseno="{{ (string)$case->caseNoDisplay }}" data-id="{{ $case->caseID }}" data-opendate="{{ $case->open_date }}" data-type="{{ $case->case_type }}" data-area="{{ $case->areaID }}" data-casename="{{ $case->name }}" data-bs-toggle="modal" data-bs-target="#closecaseModal">
                         <i class="bi bi-person-x"></i>&nbsp;結案
                       </button>
                     </td>
@@ -279,11 +279,11 @@ $(document).ready(function() {
           alert("修改成功！");
           location.reload();
         } else {
-          alert("修改失敗！");
+          alert("錯誤："+response.message);
         }
       },
       error: function() {
-        alert("修改失敗！");
+        alert("錯誤！");
       }
     });
   });
@@ -315,16 +315,15 @@ $(document).ready(function() {
       data: formData,
       dataType: "json",
       success: function(response) {
-        console.log(response);
         if (response.success) {
           alert("修改成功！");
-          // location.reload();
+          location.reload();
         } else {
           alert("修改失敗！"+response.message);
         }
       },
       error: function() {
-        alert("修改失敗！"+response.message);
+        alert("修改失敗！");
       }
     });
   });
@@ -475,11 +474,11 @@ $(document).ready(function() {
           alert("結案成功！");
           location.reload();
         } else {
-          alert("結案失敗！");
+          alert("錯誤："+response.message);
         }
       },
       error: function() {
-        alert("結案失敗！");
+        alert("錯誤！");
       }
     });
   });
@@ -516,7 +515,6 @@ function submitNewCase() {
     }
   });
 }
-
 
 </script>
 @endsection
