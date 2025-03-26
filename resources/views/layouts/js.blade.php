@@ -7,22 +7,22 @@
 <!-- Bootstrap 5 -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <!-- Bootstrap core JavaScript-->
-<script src="js/select2.min.js"></script>
-<script src="js/bootstrap.bundle.min.js"></script>
+<script src="{{ asset('js/select2.min.js') }}"></script>
+<script src="{{ asset('js/bootstrap.bundle.min.js') }}"></script>
 <!-- Core plugin JavaScript-->
-<script src="js/jquery.easing.min.js"></script>
-<script src="js/jquery.datetimepicker.js"></script>
+<script src="{{ asset('js/jquery.easing.min.js') }}"></script>
+<script src="{{ asset('js/jquery.datetimepicker.js') }}"></script>
 <!-- <script src="js/formValidationInit.js"></script>
 <script src="js/validationEngineLang.zh-TW.custom.js"></script> -->
 <!-- Custom scripts for all pages-->
-<script src="js/sb-admin-2.min.js"></script>
+<script src="{{ asset('js/sb-admin-2.min.js') }}"></script>
 
 <!-- Page level plugins -->
-<script src="js/Chart.min.js"></script>
+<script src="{{ asset('js/Chart.min.js') }}"></script>
 
 <!-- Page level custom scripts -->
-<script src="js/demo/chart-area-demo.js"></script>
-<script src="js/demo/chart-pie-demo.js"></script>
+<script src="{{ asset('js/demo/chart-area-demo.js') }}"></script>
+<script src="{{ asset('js/demo/chart-pie-demo.js') }}"></script>
 
 <!-- Bootstrap Datepicker -->
 <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.10.0/js/bootstrap-datepicker.min.js"></script>
