@@ -321,7 +321,12 @@
           <div class="topbar-divider d-none d-sm-block"></div>
           <!-- Nav Item - User Information -->
           <li class="nav-item dropdown no-arrow">
-            <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><i class="bi bi-person-circle" style="color: #a17571 !important;"></i>&nbsp;<span style="font-size:12pt;color: #a17571 !important;">{{ session('name')}}</span>
+            <a class="nav-link dropdown-toggle d-flex flex-column align-items-start mt-4" href="#" id="userDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">  
+              <span>
+                <i class="bi bi-person-circle" style="color: #a17571 !important;"></i>
+                &nbsp;<span style="font-size:12pt;color: #a17571 !important;">{{ session('name')}}</span>
+              </span>
+              <span style="font-size:8pt;color: #4F4F4F;">自動登出時間：<span id="timer-countdown" style="font-size:8pt;color: red;"></span>秒</span>
             </a>
             <!-- Dropdown - User Information -->
             <div class="dropdown-menu dropdown-menu-right shadow animated--grow-in"
@@ -382,7 +387,7 @@
       </div>
   </div>
   @include('layouts.js') 
-    
+  @include('layouts.countdown') 
 </body>
 
 </html>

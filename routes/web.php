@@ -4,6 +4,8 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\LoginController;
 use App\Http\Controllers\HClistController;
 use App\Http\Controllers\CaseController;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Session;
 
 /*
 |--------------------------------------------------------------------------
@@ -21,6 +23,11 @@ Route::get('/',  [LoginController::class, 'showLoginForm'])->name('login');
 Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
 Route::post('/login', [LoginController::class, 'processLogin'])->name('login.process');
 Route::get('/logout', [LoginController::class, 'logout'])->name('logout');
+
+Route::post('/session/extend', function (Request $request) {
+  Session::put('last_activity', now()); // 更新 Session 活動時間
+  return response()->json(['message' => 'Session extended']);
+})->name('session.extend');
 
 // 受保護的頁面
 Route::middleware(['auth.session'])->group(function () {
