@@ -3,6 +3,11 @@
 <style>
   .custom-table tbody tr:hover {
     background-color: #d1ecf1 !important;  /* 淡藍色 */
+    color: #750000 !important;
+    font-weight: bold !important;
+  }
+  .custom-table {
+    color: #272727 !important;
   }
 </style>
 @php
