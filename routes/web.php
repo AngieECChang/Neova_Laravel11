@@ -6,7 +6,7 @@ use App\Http\Controllers\HClistController;
 use App\Http\Controllers\CaseController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Session;
-
+use App\Http\Controllers\EvaluationController;
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -44,6 +44,11 @@ Route::middleware(['auth.session'])->group(function () {
   Route::post('/close-case/{id}', [CaseController::class, 'case_close'])->name('hc-case_close');
   Route::post('/reopen-case/{id}', [CaseController::class, 'reopen_case']);
   Route::post('/delete-close/{id}', [CaseController::class, 'delete_close'])->name('hc-delete_close');
+  // 顯示表單
+  Route::get('/get-evaluation-dates/{formID}/{caseID}', [EvaluationController::class, 'getEvaluationDates']);
+  Route::get('/hcevaluation/{formID}/{caseID}/{date?}', [EvaluationController::class, 'showEvaluationForm']);  //{date?} → date 是可選的，如果沒有日期，就顯示「無紀錄的表單」
+
+  // Route::get('/hcevaluation/{formID}/{caseID}', [EvaluationController::class, 'show'])->name('hcevaluation.{formID}');
 });
 
 

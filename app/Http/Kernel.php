@@ -22,6 +22,7 @@ class Kernel extends HttpKernel
         \Illuminate\Foundation\Http\Middleware\ConvertEmptyStringsToNull::class,
         \App\Http\Middleware\PermissionsMiddleware::class,
         \App\Http\Middleware\ClientDataMiddleware::class,
+        \App\Http\Middleware\CaseDataMiddleware::class,
     ];
 
     /**
@@ -40,6 +41,7 @@ class Kernel extends HttpKernel
             \Illuminate\Routing\Middleware\SubstituteBindings::class,
             \App\Http\Middleware\PermissionsMiddleware::class,  //權限管理
             \App\Http\Middleware\ClientDataMiddleware::class,
+            \App\Http\Middleware\CaseDataMiddleware::class,
         ],
 
         'api' => [
