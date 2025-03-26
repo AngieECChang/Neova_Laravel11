@@ -353,6 +353,8 @@
         </ul>
       </nav>
       <!-- End of Topbar -->
+      @include('layouts.js') 
+      @include('layouts.countdown') 
       <!-- Begin Page Content -->
       <div class="container-fluid">
         @yield('content')
@@ -386,8 +388,5 @@
           </div>
       </div>
   </div>
-  @include('layouts.js') 
-  @include('layouts.countdown') 
 </body>
-
 </html>
