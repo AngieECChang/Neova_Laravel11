@@ -1,0 +1,106 @@
+#menu .links a:hover {
+    background: #0ba143;
+    color: white;
+    text-decoration: none;
+}
+
+.links a {
+    white-space: nowrap;
+    background: #AD1457;
+    padding: 3px;
+    border-radius: 5px;
+    color: white;
+    font-size: 13px;
+    text-transform: capitalize;
+    font-weight: 600;
+    margin-right: 2px;
+}
+
+.links a:hover {
+    background: #0ba143;
+    color: white;
+    text-decoration: none;
+}
+
+#logins a,
+#tables a,
+#tables span {
+    color: #0ba143;
+    font-weight: 600;
+}
+
+#breadcrumb {
+    background: #fcffd5;
+    width: 100%;
+    font-weight: 600;
+}
+
+.logout {
+    margin-top: 0.2em;
+}
+
+#logout {
+    background: #5b5151;
+    color: #ffffff;
+    padding: 3px 10px 3px 10px;
+    border: 1px solid #5b5151;
+    font-weight: 600;
+    border-radius: 5px;
+}
+
+#tables a.select:before {
+    content: "\1F4D6";
+    visibility: visible;
+    word-spacing: normal;
+    letter-spacing: normal;
+}
+
+#tables a.select {
+    visibility: hidden;
+    word-spacing: -999px;
+    letter-spacing: -999px;
+}
+
+#tables a.select:hover {
+    text-decoration: none;
+}
+
+#table .edit {
+    background-color: #099147;
+    color: #fff;
+    font-weight: bold;
+    padding: 2px 5px 2px 5px;
+    border-radius: 5px;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+}
+
+#menu {
+    position: fixed;
+    padding: 0px;
+    background-color: white;
+}
+
+#menu .links a {
+    background-color: #AD1457;
+    margin: 0px;
+    text-transform: capitalize;
+}
+
+#menu .links a:nth-of-type(4) {
+    display: block;
+    margin-top: 5px;
+    width: fit-content;
+}
+
+form .footer input {
+    background: #5b5151;
+    border: 0px solid white;
+    color: white;
+    font-size: 13px;
+    border-radius: 5px;
+    padding: 5px;
+    font-weight: 600;
+    font-family: monospace;
+}

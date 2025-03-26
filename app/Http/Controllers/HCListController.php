@@ -14,14 +14,6 @@ class HCListController extends Controller
     $db = DatabaseConnectionService::setConnection($databaseName);
 
     $region = $request->input('region');
-
-    // 取得所有區域名稱 (不重複)
-    // $areaNames = $db->table('area_info')
-    // ->select('areaName')
-    // ->distinct()
-    // ->orderBy('area_order')
-    // ->pluck('areaName'); // 取得純陣列格式
-
     $areaNames = $db->table('area_info')
     ->select('areaID', 'areaName')
     ->distinct()
@@ -53,7 +45,7 @@ class HCListController extends Controller
     // 分類 caseType -> areaName
     $open_cases = $open_cases_query->get()->groupBy(['case_type', 'areaName']);
 
-    // dd($open_cases ->toArray());
+    //dd($open_cases ->toArray());
     return view('hc-openlist', compact('open_cases', 'region', 'areaNames'));
   }
 
@@ -66,13 +58,19 @@ class HCListController extends Controller
       ->leftJoin('cases as b', 'a.caseID', '=', 'b.caseID')
       ->select(
         'a.*',
-        'b.*'
+        'b.*',
+        'a.type as close_type'
       )
       ->orderBy('a.close_date')
       ->orderBy('b.caseNoDisplay')
       ->orderBy('a.open_date')
       ->get();
-    // dd($close_cases->toArray());
-    return view('hc-closelist', compact('close_cases'));
+    //dd($close_cases->toArray());
+    // 取得所有 `case_open` 內的 caseID
+    $open_case_ids = $db->table('case_open')
+        ->pluck('caseID') // 取得 `caseID` 列表
+        ->toArray(); // 轉成 PHP 陣列
+      
+    return view('hc-closelist', compact('close_cases', 'open_case_ids'));
   }
 }

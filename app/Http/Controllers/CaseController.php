@@ -43,8 +43,8 @@ class CaseController extends Controller
         ->insert([
           'caseID' => $id,
           'date' => now(),
-          'action' => 'update',
-          'function' => 'change_caseNoDisplay',
+          'action' => 'case_update',
+          'function' => 'caseNoDisplay_change',
           'old_value' => $oldData['caseNoDisplay'],
           'new_value' => $newData['caseNoDisplay'],
           'filler' => session('user_id')
@@ -55,8 +55,8 @@ class CaseController extends Controller
         ->insert([
           'caseID' => $id,
           'date' => now(),
-          'action' => 'update',
-          'function' => 'change_caseType',
+          'action' => 'case_update',
+          'function' => 'caseType_change',
           'old_value' => $oldData['case_type'],
           'new_value' => $newData['case_type'],
           'filler' => session('user_id')
@@ -95,8 +95,8 @@ class CaseController extends Controller
       ->insert([
         'caseID' => $id,
         'date' => now(),
-        'action' => 'update',
-        'function' => 'change_caseArea',
+        'action' => 'case_update_area',
+        'function' => 'caseArea_change',
         'old_value' => $oldArea,
         'new_value' => $newArea,
         'filler' => session('user_id')
@@ -175,7 +175,7 @@ class CaseController extends Controller
         'caseID' => $caseID,
         'date' => now(),
         'action' => 'insert',
-        'function' => 'insert_bed',
+        'function' => 'Bed_insert',
         'old_value' => '',
         'new_value' => $caseID,
         'filler' => session('user_id')
@@ -240,7 +240,130 @@ class CaseController extends Controller
       return response()->json(['success' => true]);
     }
     catch (\Exception $e) {
-      \Log::error('個案結案失敗：' . $e->getMessage());
+      return response()->json(['success' => false, 'message' => $e->getMessage()]);
+    }
+  }
+
+  public function reopen_case(Request $request, $id)
+  {
+    $databaseName = session('DB'); // 可根據條件動態變更
+    $db = DatabaseConnectionService::setConnection($databaseName);
+
+    $opendate = $request->input('opendate');
+    $closedate = $request->input('closedate');
+    $reopenDate = $request->input('reopenDate');
+    $reopenArea = $request->input('reopenArea');
+    $reopenType = $request->input('reopenType');
+    $caseType = $request->input('caseType');
+    $closeArea = $request->input('closeArea');
+    $closeBed = $request->input('closeBed');
+
+    // 驗證重收日期是否比收案日期和結案日期大
+    if (strtotime($reopenDate) <= strtotime($opendate) || strtotime($reopenDate) < strtotime($closedate)) {
+      return response()->json(['success' => false, 'message' => '重收日期必須晚於收案日期與結案日期！']);
+    }
+
+    // 檢查是否已存在於 case_open，避免重複插入
+    $exists = $db->table('case_open')->where('caseID', $id)->exists();
+
+    try {
+      if (!$exists) {
+        $db->table('case_open')->insert([
+          'caseID' => $id,
+          'bedID' => $closeBed,
+          'open_date' => $reopenDate,
+          'user' => session('user_id')
+        ]);
+
+        $db->table('bed_info')->insert([
+          'bedID' => $closeBed,
+          'areaID' => $reopenArea
+        ]);
+
+        if ($closeArea != $reopenArea) {
+          $db->table('case_log')
+          ->insert([
+            'caseID' => $id,
+            'date' => now(),
+            'action' => 'reopen',
+            'function' => 'caseArea_change',
+            'old_value' => $closeArea,
+            'new_value' => $reopenArea,
+            'filler' => session('user_id')
+          ]);
+        }
+        if ($caseType != $reopenType) {
+          $db->table('cases')
+          ->where('caseID', $id)
+          ->update([
+            'case_type' => $reopenType
+          ]);
+          $db->table('case_log')
+          ->insert([
+            'caseID' => $id,
+            'date' => now(),
+            'action' => 'reopen',
+            'function' => 'caseType_change',
+            'old_value' => $caseType,
+            'new_value' => $reopenType,
+            'filler' => session('user_id')
+          ]);
+        }
+        return response()->json(['success' => true, 'message' => '重新收案成功']);
+      }
+    }
+    catch (\Exception $e) {
+      return response()->json(['success' => false, 'message' => $e->getMessage()]);
+    }
+  }
+
+  public function delete_close(Request $request, $id)
+  {
+    $databaseName = session('DB'); // 可根據條件動態變更
+    $db = DatabaseConnectionService::setConnection($databaseName);
+    try {
+      // 取得即將刪除的紀錄
+      $record = $db->table('case_closed')
+        ->where([
+            ['caseID', '=', $id],
+            ['open_date', '=', $request->input('opendate')],
+            ['close_date', '=', $request->input('closedate')]
+        ])
+        ->first(); // 只取出第一筆符合條件的資料
+
+      if (!$record) {
+        return response()->json(['success' => false, 'message' => "找不到符合條件的紀錄，刪除失敗"]);
+      }
+
+      // 轉換 JSON，確保不是 null
+      $recordJson = $record ? json_encode($record, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT) : '{}';
+
+      // // 執行刪除並取得影響的筆數
+      $deletedRows = $db->table('case_closed')
+        ->where([
+            ['caseID', '=', $id],
+            ['open_date', '=', $request->input('opendate')],
+            ['close_date', '=', $request->input('closedate')]
+        ])
+        ->delete();
+      // $sql = "DELETE FROM case_closed WHERE caseID = ? AND open_date = ? AND close_date = ?";
+      // $result = $db->delete($sql, [$id, $request->input('opendate'), $request->input('closedate')]);
+
+      if ($deletedRows > 0) {
+        $db->table('case_log')->insert([
+            'caseID' => $id,
+            'date' => now(),
+            'action' => 'delete',
+            'function' => 'closecase_delete',
+            'old_value' => $recordJson,
+            'new_value' => '',
+            'filler' => session('user_id')
+        ]);
+        return response()->json(['success' => true, 'message' => "刪除成功"]);
+      } else {
+        return response()->json(['success' => false, 'message' => "刪除失敗，沒有符合的紀錄"]);
+      }
+    } catch (\Exception $e) {
       return response()->json(['success' => false, 'message' => $e->getMessage()]);
     }
   }

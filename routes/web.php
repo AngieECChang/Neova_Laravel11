@@ -35,6 +35,8 @@ Route::middleware(['auth.session'])->group(function () {
   Route::post('/new-case', [CaseController::class, 'case_new'])->name('hc-case_new');
   Route::post('/check-id-number', [CaseController::class, 'checkIdNumber'])->name('check-id-number');
   Route::post('/close-case/{id}', [CaseController::class, 'case_close'])->name('hc-case_close');
+  Route::post('/reopen-case/{id}', [CaseController::class, 'reopen_case']);
+  Route::post('/delete-close/{id}', [CaseController::class, 'delete_close'])->name('hc-delete_close');
 });
 
 

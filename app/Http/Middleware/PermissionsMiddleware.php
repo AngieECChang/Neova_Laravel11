@@ -7,7 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\View;
 
-class GlobalDataMiddleware
+class PermissionsMiddleware
 {
   public function handle(Request $request, Closure $next)
   {

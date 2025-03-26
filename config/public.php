@@ -10,6 +10,6 @@
       '0'=>'<span style="color:red;"><i class="bi bi-gender-female"></i></span>','1'=>'<span style="color:blue;"><i class="bi bi-gender-male"></i></span>','2'=>'<span style="color:color:#6aa84f;"><i class="bi bi-gender-ambiguous"></i></span>'
     ],
     'hc_close_reason' => [
-      '1'=>'死亡','2'=>'情況好轉','3'=>'入住長期照護機構','4'=>'搬離服務範圍','5'=>'其他'
+      '1'=>'死亡','2'=>'情況好轉','3'=>'入住長期照護機構','4'=>'搬離服務範圍','5'=>'轉其他居護單位','6'=>'其他'
     ],
   ];
