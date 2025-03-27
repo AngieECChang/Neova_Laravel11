@@ -1,22 +1,13 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Session;
 use App\Http\Controllers\LoginController;
 use App\Http\Controllers\HClistController;
 use App\Http\Controllers\CaseController;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Session;
 use App\Http\Controllers\EvaluationController;
-/*
-|--------------------------------------------------------------------------
-| Web Routes
-|--------------------------------------------------------------------------
-|
-| Here is where you can register web routes for your application. These
-| routes are loaded by the RouteServiceProvider within a group which
-| contains the "web" middleware group. Now create something great!
-|
-*/
+use App\Http\Controllers\EmployeeListController;
 
 // Route::get('/', function () { return view('welcome'); });
 Route::get('/',  [LoginController::class, 'showLoginForm'])->name('login');
@@ -47,8 +38,10 @@ Route::middleware(['auth.session'])->group(function () {
   // 顯示表單
   Route::get('/get-evaluation-dates/{formID}/{caseID}', [EvaluationController::class, 'getEvaluationDates']);
   Route::get('/hcevaluation/{formID}/{caseID}/{date?}', [EvaluationController::class, 'showEvaluationForm']);  //{date?} → date 是可選的，如果沒有日期，就顯示「無紀錄的表單」
-
+  Route::post('/hcevaluation/save', [EvaluationController::class, 'save'])->name('hcevaluation.save');
   // Route::get('/hcevaluation/{formID}/{caseID}', [EvaluationController::class, 'show'])->name('hcevaluation.{formID}');
+  Route::get('/personnel/employeelist', [EmployeeListController::class, 'showlist']);
+  Route::get('/personnel/{formID}/{employeeID}', [EmployeeListController::class, 'showForm']);
 });
 
 
