@@ -8,42 +8,42 @@ use App\Services\DatabaseConnectionService;
 
 class EvaluationController extends Controller
 {
-  public function show($formID, $caseID)
-  {
-    $databaseName = session('DB'); // 可根據條件動態變更
-    $db = DatabaseConnectionService::setConnection($databaseName);
+  // public function show($formID, $caseID)
+  // {
+  //   $databaseName = session('DB'); // 可根據條件動態變更
+  //   $db = DatabaseConnectionService::setConnection($databaseName);
 
-    $form = str_replace("form","hcevaluation",$formID);
+  //   $form = str_replace("form","hcevaluation",$formID);
 
-    $the_case = $db->table('cases')
-      ->where('caseID', $caseID)
-      ->first(); // 只取出第一筆符合條件的資料
+  //   $the_case = $db->table('cases')
+  //     ->where('caseID', $caseID)
+  //     ->first(); // 只取出第一筆符合條件的資料
 
-    if(!$the_case){
-      $the_case = array_fill_keys(
-        \Schema::getColumnListing('cases'), 
-        null
-      );
-    }
-    $result = $db->table($form)
-    ->where('caseID', $caseID)
-    ->orderByDesc('date')
-    ->get();
+  //   if(!$the_case){
+  //     $the_case = array_fill_keys(
+  //       \Schema::getColumnListing('cases'), 
+  //       null
+  //     );
+  //   }
+  //   $result = $db->table($form)
+  //   ->where('caseID', $caseID)
+  //   ->orderByDesc('date')
+  //   ->get();
 
-    if(!$result){
-      $result = array_fill_keys(
-        \Schema::getColumnListing($form), 
-        null
-      );
-    }
+  //   if(!$result){
+  //     $result = array_fill_keys(
+  //       \Schema::getColumnListing($form), 
+  //       null
+  //     );
+  //   }
       
-    // 取得住院及結案資訊
-    $case_open = $db->table('case_open')->where('caseID', $caseID)->orderByDesc('open_date')->first();
-    $case_closed = $db->table('case_closed')->where('caseID', $caseID)->orderByDesc('close_date')->first();
+  //   // 取得住院及結案資訊
+  //   $case_open = $db->table('case_open')->where('caseID', $caseID)->orderByDesc('open_date')->first();
+  //   $case_closed = $db->table('case_closed')->where('caseID', $caseID)->orderByDesc('close_date')->first();
 
-    //dd($open_cases ->toArray());
-    return view('hcevaluation.'. $formID, compact('the_case', 'result', 'case_open', 'case_closed'));
-  }
+  //   //dd($open_cases ->toArray());
+  //   return view('hcevaluation.'. $formID, compact('the_case', 'result', 'case_open', 'case_closed'));
+  // }
 
   public function getEvaluationDates($formID, $caseID)
   {
@@ -73,10 +73,8 @@ class EvaluationController extends Controller
     ->first(); // 只取出第一筆符合條件的資料
 
     if(!$the_case){
-      $the_case = array_fill_keys(
-        \Schema::getColumnListing('cases'), 
-        null
-      );
+      // 確保 $the_case 為 Collection，而不是純陣列
+      $the_case =  (object)array_fill_keys(\Schema::getColumnListing('cases'), null);
     }
 
     if($date!=""){
@@ -88,27 +86,26 @@ class EvaluationController extends Controller
       $result = $db->table($form)
       ->where('caseID', $caseID)
       ->orderByDesc('date')
-      ->get();
+      ->first();
     }
 
     if(!$result){
-      $result = array_fill_keys(
-        \Schema::getColumnListing($form), 
-        null
-      );
+      $result =  (object)array_fill_keys(\Schema::getColumnListing($form), null);
     }
     // 取得住院及結案資訊
     $case_open = $db->table('case_open')->where('caseID', $caseID)->orderByDesc('open_date')->first();
     $case_closed = $db->table('case_closed')->where('caseID', $caseID)->orderByDesc('close_date')->first();
-    
+
     return view('hcevaluation.'.$formID, compact('the_case', 'result', 'case_open', 'case_closed', 'formID', 'caseID', 'date'));
   }
 
-  public function save()
+  public function save(Request $request)
   {
     $databaseName = session('DB'); // 可根據條件動態變更
     $db = DatabaseConnectionService::setConnection($databaseName);
-
+    // 直接取得輸入的資料，沒有自動驗證
+    $data_array = $request->except('_token');  //取得所有數據但排除 _token
+    dd($data_array);
     $close_cases = $db->table('case_closed as a')
       ->leftJoin('cases as b', 'a.caseID', '=', 'b.caseID')
       ->select(
