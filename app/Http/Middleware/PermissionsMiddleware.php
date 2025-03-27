@@ -35,8 +35,12 @@ class PermissionsMiddleware
       ->get()
       ->groupBy('cateID'); // 以 cateID 分類
 
+      $cities = DB::table('mohw_areacode')->select('city_name')->groupBy('city_name', 'order')->orderBy('order')->pluck('city_name')->toArray();
+
       // 共享數據到所有視圖
+      // View::share(['allow_permission', $permissions, 'cities', $cities]);
       View::share('allow_permission', $permissions);
+      View::share('cities', $cities);
       // dd($permissions->toArray()); // 測試 Middleware 是否正常運作
     }
 
