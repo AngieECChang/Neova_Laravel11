@@ -23,6 +23,7 @@ class Kernel extends HttpKernel
         \App\Http\Middleware\PermissionsMiddleware::class,
         \App\Http\Middleware\ClientDataMiddleware::class,
         \App\Http\Middleware\CaseDataMiddleware::class,
+        \App\Http\Middleware\TrimAllStrings::class,
     ];
 
     /**
@@ -42,6 +43,7 @@ class Kernel extends HttpKernel
             \App\Http\Middleware\PermissionsMiddleware::class,  //權限管理
             \App\Http\Middleware\ClientDataMiddleware::class,
             \App\Http\Middleware\CaseDataMiddleware::class,
+            \App\Http\Middleware\TrimAllStrings::class,
         ],
 
         'api' => [
