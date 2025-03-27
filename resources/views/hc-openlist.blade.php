@@ -220,19 +220,19 @@
 @include('includes.edit-case-area')
 <script>
   document.querySelectorAll('.tableSearch').forEach(function(input) {
-  input.addEventListener('keyup', function() {
-    let filter = this.value.toLowerCase();
-    let tables = document.querySelectorAll(".searchable-table");
+    input.addEventListener('keyup', function() {
+      let filter = this.value.toLowerCase();
+      let tables = document.querySelectorAll(".searchable-table");
 
-    tables.forEach(table => {
-      let rows = table.querySelectorAll("tbody tr");
-      rows.forEach(row => {
-        let text = row.innerText.toLowerCase();
-        row.style.display = text.includes(filter) ? "" : "none";
+      tables.forEach(table => {
+        let rows = table.querySelectorAll("tbody tr");
+        rows.forEach(row => {
+          let text = row.innerText.toLowerCase();
+          row.style.display = text.includes(filter) ? "" : "none";
+        });
       });
     });
   });
-});
 
 function convertYearDropdownToROC(inst) {
   // 找出 select 元件
