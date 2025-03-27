@@ -23,3 +23,21 @@
       return $date;
     }
   }
+
+  if (!function_exists('calcperiodwithyear')) {
+  //計算天數 (大於一年即回傳年數)
+    function senioritywithyear($startdate, $enddate)
+    {
+      if ($startdate != "" && $enddate != "") {
+        $days = (((strtotime($enddate) - strtotime($startdate)) / 3600) / 24) + 1;
+        if ($days >= 365) {
+            $years = round(($days / 365), 1);
+            return $years . "年";
+        } else {
+            return round($days) . "天";
+        }
+      } else {
+        return "---";
+      }
+    }
+  }
