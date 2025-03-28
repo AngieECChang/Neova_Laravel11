@@ -50,3 +50,27 @@
       return substr($IdNo, 0, 3) . str_repeat('*', strlen($IdNo) - 6) . substr($IdNo, -3);
     }
   }
+
+  /**
+   * 將選項依欄數切塊，並加入對應 col class
+   *
+   * @param array $options 選項陣列（key => label）
+   * @param int $columnsPerRow 幾個一排（用來算 col-md）
+   * @return array 每列一組的陣列，每項含 key, label, colClass
+   * 自動處理排版
+  */
+  if (!function_exists('chunkWithBootstrapCol')) {
+    function chunkWithBootstrapCol(array $options, int $columnsPerRow): array
+    {
+      $col = 12 / $columnsPerRow;
+      $chunks = collect($options)->map(function ($label, $key) use ($col) {
+          return [
+            'key' => $key,
+            'label' => $label,
+            'colClass' => "col-12 col-md-{$col}",
+          ];
+      })->chunk($columnsPerRow);
+
+      return $chunks->toArray();
+    }
+  }
