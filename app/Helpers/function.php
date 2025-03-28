@@ -41,3 +41,12 @@
       }
     }
   }
+
+  //遮罩身份證字號
+  if (!function_exists('maskIdNo')) {
+    function maskIdNo($IdNo)
+    {
+      if (strlen($IdNo) <= 6) return $IdNo;
+      return substr($IdNo, 0, 3) . str_repeat('*', strlen($IdNo) - 6) . substr($IdNo, -3);
+    }
+  }
