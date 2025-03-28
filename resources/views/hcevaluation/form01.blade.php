@@ -24,14 +24,33 @@
     width: 150px;
   }
 
+  /* 員工 */
+  option.employee {
+    color: #071B37;
+  }
+
+  /* 被選取的項目 — 無論在職或離職 */
+  select option:checked {
+    color: #071B37;
+    font-weight: bold;
+    background-color: #fff3cd; /* 淡黃色背景 */
+  }
+
+  input,
+  select,
+  textarea {
+    color: #071B37 !important; /* 深藍色 */
+  }
+
+
 </style>
 <div class="row align-items-center mt-4">
   <div class="col-6">
-    <h1 class="h3 text-gray-800 mb-4">全人周全性評估_基本資料</h1>
+    <h1 class="h3 text-gray-800 mb-2">全人周全性評估_基本資料</h1>
   </div>
 </div>
-<div class="card shadow-sm mb-4">
-  <div class="card-body">
+<div class="card shadow-sm mb-2">
+  <div class="card-body" style="max-height: 570px; overflow-y: auto;">
     <form method="POST" action="{{ route('hcevaluation.save') }}">
       @csrf
       <input type="hidden" name="caseID" value="{{ $the_case->caseID ?? '0' }}">
@@ -39,11 +58,11 @@
         <tbody>
           <tr>
             <th width="120" class="table-success">姓名</th>
-            <td width="320">
-                <input type="text" class="form-control input-150" value="{{ $the_case->name ?? '空白個案' }}">
+            <td width="320" colspan="2">
+                <input type="text" class="form-control input-150" value="{{ $the_case->name ?? '' }}" placeholder="{{ $the_case->name ?? '請選擇個案' }}">
             </td>
             <th width="120" class="table-success">性別</th>
-            <td width="320">
+            <td width="*" colspan="2">
               <div class="form-check form-check-inline">
                 <input class="form-check-input radio" type="radio" name="gender" id="gender1" value="1" {{ $gender == "1" ? "checked" : "" }}>
                 <label class="form-check-label radio" for="gender1"> 男 </label>
@@ -57,7 +76,7 @@
                 <label class="form-check-label" for="gender2">其他 </label>
               </div>
             </td>
-            <td colspan="2" rowspan="4" width="*" class="text-center">
+            <td rowspan="4" width="180" class="text-center">
               {{-- 大頭照區塊 --}}
               <div class="mb-2">
                 <img src="{{ $photoUrl ?? asset('images/noImage.png') }}" alt="大頭照"
@@ -70,24 +89,24 @@
           </tr>
           <tr>
             <th class="table-success">生日</th>
-            <td>
+            <td colspan="2">
               <div class="d-flex align-items-center">
                 民國 <input type="text" class="form-control" name="birthdate" id="birthdate" value="{{ optional($the_case)->birthdate ? dateTo_c($the_case->birthdate) : '' }}" style="width: 150px;margin-left: 8px;">
               </div>
               <input type="hidden" id="birthdate_AD" value="{{ optional($the_case)->birthdate }}">
             </td>
             <th class="table-success">身分證字號</th>
-            <td colspan="3">
+            <td colspan="4">
               <input type="text" class="form-control input-150" name="IdNo" value="{{ optional($the_case)->IdNo }}" required>
             </td>
           </tr>
           <tr>
             <th class="table-success">聯絡電話</th>
-            <td>            
+            <td colspan="2">            
               <input type="text" class="form-control input-150" name="PhoneNumber" value="{{ optional($result)->PhoneNumber ?? '' }}" style="margin-left: 8px;">            
             </td>
             <th class="table-success">個案類型</th>
-            <td colspan="3">
+            <td colspan="4">
               @foreach (getOptionList('CaseType') as $key => $value)
                 <div class="form-check form-check-inline">
                   <input class="form-check-input radio" type="radio" name="CaseType" id="CaseType{{$key}}" value="{{$key}}" {{ optional($result)->CaseType == $key ? "checked" : "" }}>
@@ -99,18 +118,20 @@
           <tr>
             <th class="table-success">收案來源</th>
             <td colspan="5">
-              @foreach (getOptionList('CaseSource') as $key => $value)
-                <div class="form-check form-check-inline">
-                  <input class="form-check-input radio" type="radio" name="CaseSource" id="CaseSource{{$key}}" value="{{$key}}" {{ optional($result)->CaseSource == $key ? "checked" : "" }}>
-                  <label class="form-check-label" for="CaseSource{{$key}}"> {{$value}} </label>
-                </div>
-              @endforeach
-              <input type="text" class="form-control input-150" name="CaseSource_other" value="{{ optional($result)->CaseSource_other }}" required>
+              <div class="form-check form-check-inline">
+                @foreach (getOptionList('CaseSource') as $key => $value)
+                  <div class="form-check form-check-inline">
+                    <input class="form-check-input radio" type="radio" name="CaseSource" id="CaseSource{{$key}}" value="{{$key}}" {{ optional($result)->CaseSource == $key ? "checked" : "" }}>
+                    <label class="form-check-label" for="CaseSource{{$key}}"> {{$value}} </label>
+                  </div>
+                @endforeach
+                <input type="text" class="form-control input-150" name="CaseSource_other" value="{{ optional($result)->CaseSource_other }}">
+              </div>
             </td>
           </tr>
           <tr>
             <th class="table-success">地址</th>
-            <td colspan="5">
+            <td colspan="7">
               <div class="row align-items-end g-2">
                 <div class="col-auto">
                   <label for="city" class="form-label" style="font-size: 10pt;">縣市</label>
@@ -137,64 +158,253 @@
             </td>
           </tr>
           <tr>
-            <th class="table-success">婚姻狀況</th>
-            <td colspan="3">
-                <select class="form-select" name="Q7">
-                    <option value="1">未婚</option>
-                    <option value="2">已婚</option>
-                    <option value="3">分居</option>
-                    <option value="4">喪偶</option>
-                    <option value="5">離異</option>
-                </select>
+            <th class="table-success">教育程度</th>
+            <td colspan="7">
+              <div class="form-check form-check-inline">
+                @foreach (getOptionList('Education') as $key => $value)
+                  <div class="form-check form-check-inline">
+                    <input class="form-check-input radio" type="radio" name="Education" id="Education{{$key}}" value="{{$key}}" {{ optional($result)->Education == $key ? "checked" : "" }}>
+                    <label class="form-check-label" for="Education{{$key}}"> {{$value}} </label>
+                  </div>
+                @endforeach
+                <input type="text" class="form-control input-150" name="Education_other" value="{{ optional($result)->Education_other }}">
+              </div>
             </td>
           </tr>
           <tr>
-            <th class="table-success">教育程度</th>
-            <td>
-                <select class="form-select" name="Q4">
-                    <option value="1">不識字</option>
-                    <option value="2">識字未就學</option>
-                    <option value="3">小學</option>
-                    <option value="4">初中(職)</option>
-                    <option value="5">高中(職)</option>
-                    <option value="6">大學(專技)以上</option>
-                </select>
-            </td>
             <th class="table-success">婚姻狀況</th>
-            <td colspan="3">
-                <select class="form-select" name="Q7">
-                    <option value="1">未婚</option>
-                    <option value="2">已婚</option>
-                    <option value="3">分居</option>
-                    <option value="4">喪偶</option>
-                    <option value="5">離異</option>
-                </select>
+            <td colspan="7">
+              <div class="form-check form-check-inline">
+                @foreach (getOptionList('Marriage') as $key => $value)
+                  <div class="form-check form-check-inline">
+                    <input class="form-check-input radio" type="radio" name="Marriage" id="Marriage{{$key}}" value="{{$key}}" {{ optional($result)->Marriage == $key ? "checked" : "" }}>
+                    <label class="form-check-label" for="Marriage{{$key}}"> {{$value}} </label>
+                  </div>
+                @endforeach
+                <input type="text" class="form-control input-150" name="Marriage_other" value="{{ optional($result)->Marriage_other }}">
+              </div>
             </td>
           </tr>
           <tr>
             <th class="table-success">宗教信仰</th>
-            <td>
-                <select class="form-select" name="Q13">
-                    <option value="1">無</option>
-                    <option value="2">佛教</option>
-                    <option value="3">道教</option>
-                    <option value="4">基督教</option>
-                    <option value="5">天主教</option>
-                    <option value="6">回教</option>
-                    <option value="7">其他</option>
-                </select>
+            <td colspan="7">
+              <div class="form-check form-check-inline">
+                @foreach (getOptionList('Religion') as $key => $value)
+                  <div class="form-check form-check-inline">
+                    <input class="form-check-input radio" type="radio" name="Religion" id="Religion{{$key}}" value="{{$key}}" {{ optional($result)->Religion == $key ? "checked" : "" }}>
+                    <label class="form-check-label" for="Religion{{$key}}"> {{$value}} </label>
+                  </div>
+                @endforeach
+                <input type="text" class="form-control input-150" name="Religion_other" value="{{ optional($result)->Religion_other }}">
+              </div>
             </td>
-            <th class="table-success">緊急聯絡人</th>
-            <td colspan="3"><input type="text" class="form-control" name="Q29b" required></td>
           </tr>
           <tr>
-            <th class="table-success">電話</th>
-            <td colspan="5"><input type="text" class="form-control" name="Q29c" required></td>
+            <th class="table-success">主要職業</th>
+            <td colspan="7">
+              <div class="form-check form-check-inline">
+                @foreach (getOptionList('ExJob') as $key => $value)
+                  <div class="form-check form-check-inline">
+                    <input class="form-check-input radio" type="radio" name="ExJob" id="ExJob{{$key}}" value="{{$key}}" {{ optional($result)->ExJob == $key ? "checked" : "" }}>
+                    <label class="form-check-label" for="ExJob{{$key}}"> {{$value}} </label>
+                  </div>
+                @endforeach
+                <input type="text" class="form-control input-150" name="ExJob_other" value="{{ optional($result)->ExJob_other }}">
+              </div>
+            </td>
           </tr>
           <tr>
-            <th width="120" class="table-success">評估日期</th>
-            <td colspan="6">
+            <th class="table-success">家庭經濟<br>狀況</th>
+            <td colspan="4">
+              <div class="form-check form-check-inline">
+                @foreach (getOptionList('Economic') as $key => $value)
+                  <div class="form-check form-check-inline">
+                    <input class="form-check-input radio" type="radio" name="Economic" id="Economic{{$key}}" value="{{$key}}" {{ optional($result)->Economic == $key ? "checked" : "" }}>
+                    <label class="form-check-label" for="Economic{{$key}}"> {{$value}} </label>
+                  </div>
+                @endforeach
+                <input type="text" class="form-control input-150" name="Economic_other" value="{{ optional($result)->Economic_other }}">
+              </div>
+            </td>
+            <th class="table-success" width="120">是否有福利</th>
+            <td colspan="2">
+              <div class="form-check form-check-inline">
+                <input class="form-check-input radio" type="radio" name="HasWelfare" id="HasWelfare0" value="0" {{ optional($result)->HasWelfare == "0" ? "checked" : "" }}>
+                <label class="form-check-label radio" for="HasWelfare0"> 無 </label>
+              </div>
+              <div class="form-check form-check-inline ">
+                <input class="form-check-input radio" type="radio" name="HasWelfare" id="HasWelfare1" value="1" {{ optional($result)->HasWelfare == "1" ? "checked" : "" }}>
+                <label class="form-check-label" for="gender1"> 有 </label>
+              </div>
+            </td>
+          </tr>
+          <tr>
+            <th class="table-success">福利種類</th>
+            <td colspan="7">
+              <div class="form-check form-check-inline">
+                @foreach (getOptionList('Welfare') as $key => $value)
+                  <div class="form-check form-check-inline">
+                    <input class="form-check-input radio" type="radio" name="Welfare" id="Welfare{{$key}}" value="{{$key}}" {{ optional($result)->Welfare == $key ? "checked" : "" }}>
+                    <label class="form-check-label" for="Welfare{{$key}}"> {{$value}} </label>
+                  </div>
+                @endforeach
+                <input type="text" class="form-control input-150" name="Welfare_other" value="{{ optional($result)->Welfare_other }}">
+              </div>
+            </td>
+          </tr>
+          <tr>
+            <th class="table-success">身障類別</th>
+            <td colspan="7">
+              @php
+                $chunks = chunkWithBootstrapCol(getOptionList('DisabilityType'), 2);
+              @endphp
+              @foreach ($chunks as $row)
+                <div class="row mb-2">
+                  @foreach ($row as $item)
+                    <div class="{{ $item['colClass'] }}">
+                      <div class="form-check">
+                        <input class="form-check-input radio" type="radio" name="DisabilityType" id="DisabilityType{{ $item['key'] }}" value="{{ $item['key'] }}"  {{ optional($result)->DisabilityType == $item['key'] ? 'checked' : '' }}>
+                        <label class="form-check-label" for="DisabilityType{{ $item['key'] }}">&nbsp;
+                          {{ $item['label'] }}
+                        </label>
+                      </div>
+                    </div>
+                  @endforeach
+                </div>
+              @endforeach
+            </td>
+          </tr>
+          <tr>
+            <th class="table-success">主要照顧者</th>
+            <td colspan="7">
+              <div class="form-check form-check-inline">
+                關係：                
+                @foreach (getOptionList('CaregiverID') as $key => $value)
+                  <div class="form-check form-check-inline">
+                    <input class="form-check-input radio" type="radio" name="CaregiverID" id="CaregiverID{{$key}}" value="{{$key}}" {{ optional($result)->CaregiverID == $key ? "checked" : "" }}>
+                    <label class="form-check-label" for="CaregiverID{{$key}}"> {{$value}} </label>
+                  </div>
+                @endforeach
+                <input type="text" class="form-control input-150" name="CaregiverID_other" value="{{ optional($result)->CaregiverID_other }}">
+              </div>
+              <div class="form-check form-check-inline">
+                姓名：<input type="text" class="form-control input-150" name="CaregiverName" value="{{ optional($result)->CaregiverName }}">
+                ，聯絡電話：<input type="text" class="form-control input-150" name="CaregiverTel" value="{{ optional($result)->CaregiverTel }}">
+              </div>
+              <div class="row align-items-end g-2">
+                <div class="col-auto">
+                  <label for="CaregiverAddress" class="form-label" style="font-size: 10pt;">縣市</label>
+                  <select name="CaregiverAddress_city" id="CaregiverAddress_city" class="form-control">
+                    <option value="">請選擇</option>
+                    @foreach($cities as $city)
+                      <option value="{{ $city }}" {{ optional($result)->CaregiverAddress_city === $city ? 'selected' : '' }}>
+                        {{ $city }}
+                      </option>
+                    @endforeach  
+                  </select>
+                </div>
+                <div class="col-auto">
+                  <label for="CaregiverAddress_town" class="form-label" style="font-size: 10pt;">市區鄉鎮</label>
+                  <select name="CaregiverAddress_town" id="CaregiverAddress_town" class="form-control">
+                    <option value="">請先選擇縣市</option>
+                  </select>
+                </div>
+                <div class="col">
+                  <label for="address_detail" class="form-label" style="font-size: 10pt;">地址</label>
+                  <input type="text" name="CaregiverAddress_lane" id="CaregiverAddress_lane" class="form-control" value="{{ optional($result)->CaregiverAddress_lane ?? '' }}" style="width:300px;">
+                </div>
+              </div>                    
+            </td>
+          </tr>
+          <tr>
+            <th class="table-success" width="120">緊急聯絡人</th>
+            <td colspan="7">
+              <div class="form-check form-check-inline">
+                姓名：<input type="text" class="form-control input-150" name="EgyContactName" value="{{ optional($result)->EgyContactName }}">
+                ，聯絡電話1：<input type="text" class="form-control input-150" name="EgyContactTel1" value="{{ optional($result)->EgyContactTel1 }}">
+                ，聯絡電話2：<input type="text" class="form-control input-150" name="EgyContactTel2" value="{{ optional($result)->EgyContactTel2 }}">
+              </div> 
+              <br><br>
+              <div class="form-check form-check-inline">
+                @foreach (getOptionList('EgyContactRelation') as $key => $value)
+                  <div class="form-check form-check-inline">
+                    <input class="form-check-input radio" type="radio" name="EgyContactRelation" id="EgyContactRelation{{$key}}" value="{{$key}}" {{ optional($result)->EgyContactRelation == $key ? "checked" : "" }}>
+                    <label class="form-check-label" for="EgyContactRelation{{$key}}"> {{$value}} </label>
+                  </div>
+                @endforeach
+                <input type="text" class="form-control input-150" name="EgyContactRelation_other" value="{{ optional($result)->EgyContactRelation_other }}">
+              </div>    
+              
+            </td>
+          </tr>
+          <tr>
+            <th class="table-success">主要醫療決定者</th>
+            <td colspan="7">
+              <div class="form-check form-check-inline">
+                @foreach (getOptionList('DecisionMakerRelation') as $key => $value)
+                  <div class="form-check form-check-inline">
+                    <input class="form-check-input radio" type="radio" name="DecisionMakerRelation" id="DecisionMakerRelation{{$key}}" value="{{$key}}" {{ optional($result)->DecisionMakerRelation == $key ? "checked" : "" }}>
+                    <label class="form-check-label" for="DecisionMakerRelation{{$key}}"> {{$value}} </label>
+                  </div>
+                @endforeach
+                <input type="text" class="form-control input-150" name="DecisionMakerRelation_other" value="{{ optional($result)->DecisionMakerRelation_other }}">
+              </div>    
+            </td>
+          </tr>
+          <tr>
+            <th class="table-success">一年內有無重大事件發生</th>
+            <td colspan="7">
+              <div class="form-check form-check-inline">
+                <div class="form-check form-check-inline">
+                  <input class="form-check-input radio" type="radio" name="HasWelfare" id="HasWelfare0" value="0" {{ optional($result)->HasWelfare == "0" ? "checked" : "" }}>
+                  <label class="form-check-label radio" for="HasWelfare0"> 無 </label>
+                </div>
+                <div class="form-check form-check-inline ">
+                  <input class="form-check-input radio" type="radio" name="HasWelfare" id="HasWelfare1" value="1" {{ optional($result)->HasWelfare == "1" ? "checked" : "" }}>
+                  <label class="form-check-label" for="gender1"> 有 </label>
+                </div>
+                ，項目：
+                <div class="form-check form-check-inline">
+                  @foreach (getOptionList('MEventItem') as $key => $value)
+                    <div class="form-check form-check-inline">
+                      <input class="form-check-input radio" type="radio" name="MEventItem" id="MEventItem{{$key}}" value="{{$key}}" {{ optional($result)->MEventItem == $key ? "checked" : "" }}>
+                      <label class="form-check-label" for="MEventItem{{$key}}"> {{$value}} </label>
+                    </div>
+                  @endforeach
+                  <input type="text" class="form-control input-150" name="MEventItem_other" value="{{ optional($result)->MEventItem_other }}">
+                </div>
+              </div>
+            </td>            
+          </tr>
+          <tr>
+            <th class="table-success">個案描述</th>
+            <td colspan="7">
+              <div class="form-check form-check-inline w-100">
+                <textarea class="form-control w-100" name="CaseDesc" rows="4" maxlength="1000" style="resize: vertical;">{{ optional($result)->CaseDesc }}</textarea>
+              </div>
+            </td>
+          </tr>
+          <tr>
+            <th class="table-success">評估日期</th>
+            <td colspan="2">
               <input type="text" class="form-control datepicker" name="date" value="{{ now()->format('Y-m-d') }}" required style="width: 150px;">
+            </td>
+            <th class="table-success">評估人員</th>
+            <td colspan="4">
+              <select name="NurseID" class="form-control" style="width:220px;">
+                <option value=""></option>
+                @foreach ($employeesListByIdNo as $emp)
+                  <option value="{{ $emp->IdNo }}" class="employee" @selected($selected_employeesByIdNo_id == $emp->employeeID)>
+                    {{ maskIdNo($emp->IdNo) }} - {{ $emp->name }}
+                  </option>
+                @endforeach
+
+                @if ($selected_employeesByIdNo_quit)
+                  <option value="{{ $selected_quit->IdNo }}" class="employee" selected>
+                    {{ maskIdNo($selected_employeesByIdNo_quit->IdNo) }} - {{ $selected_employeesByIdNo_quit->name }}（離職）
+                  </option>
+                @endif
+              </select>
             </td>
           </tr>
         </tbody>
@@ -280,6 +490,19 @@
             options += `<option value="${town}">${town}</option>`;
         });
         $('#town').html(options);
+      });
+    });
+    
+    $('#CaregiverAddress_city').on('change', function () {
+      let city = $(this).val();
+      $('#CaregiverAddress_town').html('<option value="">載入中...</option>');
+
+      $.get('/api/towns', { city: city }, function (data) {
+        let options = '<option value="">請選擇</option>';
+        data.forEach(function (town) {
+            options += `<option value="${town}">${town}</option>`;
+        });
+        $('#CaregiverAddress_town').html(options);
       });
     });
   });
