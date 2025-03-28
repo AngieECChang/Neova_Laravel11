@@ -8,9 +8,8 @@ class AddressController extends Controller
 {
   public function getTowns(Request $request)
   {
-    $city = $request->input('city');
-    // $field = $request->input('field', 'city');  // 預設是 'city'
-    // $city = $request->input($field);
+    $field = $request->input('field', 'city');  // 預設是 'city'
+    $city = $request->input($field);
     
     if ($city === '桃園縣') {
         $city = '桃園市';
