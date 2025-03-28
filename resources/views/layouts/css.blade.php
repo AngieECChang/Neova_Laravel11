@@ -19,3 +19,48 @@
   <!-- <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"> -->
   <!-- Bootstrap Datepicker -->
   <!-- <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.10.0/css/bootstrap-datepicker.min.css" rel="stylesheet"> -->
+
+  <style>
+    @media print {
+      @page {
+        size: A4 portrait;
+        margin: 1.5cm;
+      }
+      body {
+        margin: 0 !important;
+      }
+      .sidebar,
+      .topbar,
+      .navbar,
+      .scroll-to-top,
+      .btn,
+      .modal,
+      .dropdown,
+      footer,
+      #case_selector,
+      .sidebar-card {
+        display: none !important;
+      }
+      #content-wrapper, #content, .container-fluid {
+        margin: 0 !important;
+        padding: 0 !important;
+        width: 100%;
+      }
+
+      /* 顯示主要內容區域 */
+      @media print {
+        body * {
+          visibility: hidden;
+        }
+        .container-fluid, .container-fluid * {
+          visibility: visible;
+        }
+        .container-fluid {
+          position: absolute;
+          left: 0;
+          top: 0;
+          width: 100%;
+        }
+      }
+    }
+  </style>

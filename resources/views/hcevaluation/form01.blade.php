@@ -42,11 +42,22 @@
     color: #071B37 !important; /* 深藍色 */
   }
 
-
 </style>
 <div class="row align-items-center mt-4">
   <div class="col-6">
     <h1 class="h3 text-gray-800 mb-2">全人周全性評估_基本資料</h1>
+  </div>
+  <div class="col-6">
+    <form method="GET" class="d-flex align-items-center justify-content-end" id="regionForm">
+      <div class="text-end mb-3">
+        <button type="button" class="btn btn-secondary" onclick="window.print()">
+          列印本頁
+        </button>
+        <a href="{{ route('hcevaluation.print', ['formID' => request()->segment(2) ,'caseID' => request()->segment(3),'date' => request()->segment(4)??'']) }}" target="_blank" class="btn btn-outline-primary">
+          前往列印頁
+        </a>
+      </div>
+    </form>
   </div>
 </div>
 <div class="card shadow-sm mb-2">

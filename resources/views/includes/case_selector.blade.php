@@ -1,4 +1,4 @@
-<div class="sticky-top shadow-sm p-3 rounded" style="background-color:#FFDCB9	;">
+<div class="sticky-top shadow-sm p-3 rounded" style="background-color:#FFDCB9	;" id="case_selector">
   <div class="d-flex align-items-center justify-content-between">
     <div class="d-flex align-items-center">
       <div class="col-1">
@@ -26,6 +26,7 @@
   </div>
 </div>
 <input type="hidden" id="formID" value="{{ $formID ?? '' }}">
+<input type="hidden" id="print_url">
 <script>
   $('#selectCase').select2({
     placeholder: "請選擇或輸入個案名稱",
@@ -71,7 +72,6 @@
       let date = this.value;
 
       if (!caseID || !date || !formID) return;
-
       // 這裡假設所有表單的 URL 格式為 `/hcevaluation/{formid}/{caseID}/{date}`
       window.location.href = `/hcevaluation/${formID}/${caseID}/${date}`;
     });
