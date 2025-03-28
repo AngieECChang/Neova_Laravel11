@@ -11,7 +11,7 @@
     <!-- Sidebar -->
     <ul class="navbar-nav bg-gradient-primary sidebar sidebar-dark accordion" id="accordionSidebar">
       <!-- Sidebar - Brand -->
-      <a class="sidebar-brand d-flex align-items-center justify-content-center" href="{{ route('dashboard') }}">
+      <a class="sidebar-brand d-flex align-items-center justify-content-center" href="{{ route('hc-openlist') }}">
         <div class="sidebar-brand-icon rotate-n-15">
             <i class="fas fa-laugh-wink"></i>
         </div>
@@ -26,8 +26,8 @@
         </a>
         <div id="categorylist" class="collapse" style="line-height:10px !important; padding:0rem 0rem !important;" aria-labelledby="headingTwo" data-parent="#accordionSidebar">
         <div class="bg-white py-2 collapse-inner rounded">
-          <a class="collapse-item d-inline-block" href="{{route('hc-openlist')}}" style="font-size:11pt !important;font-weight: 600 !important;color:#6f42c1 !important;"><i class="bi bi-person-plus"></i> &nbsp;<span style="font-size:11pt !important;font-weight: 600 !important;color:#6f42c1 !important;">預收案</span>
-          </a>
+          <!-- <a class="collapse-item d-inline-block" href="{{route('hc-openlist')}}" style="font-size:11pt !important;font-weight: 600 !important;color:#6f42c1 !important;"><i class="bi bi-person-plus"></i> &nbsp;<span style="font-size:11pt !important;font-weight: 600 !important;color:#6f42c1 !important;">預收案</span>
+          </a> -->
           <a class="collapse-item d-inline-block" href="{{route('hc-openlist')}}" style="font-size:11pt !important;font-weight: 600 !important;color:#6f42c1 !important;"><i class="bi bi-person-check"></i> &nbsp;<span style="font-size:11pt !important;font-weight: 600 !important;color:#6f42c1 !important;">收案</span>
           </a>
           <a class="collapse-item d-inline-block" href="{{route('hc-closelist')}}" style="font-size:11pt !important;font-weight: 600 !important;color:#6f42c1 !important;"><i class="bi bi-person-x"></i> &nbsp;<span style="font-size:11pt !important;font-weight: 600 !important;color:#6f42c1 !important;">結案</span>

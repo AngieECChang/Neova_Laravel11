@@ -35,7 +35,7 @@ class LoginController extends Controller
             'client_type' => $client->client_type,
             'DB' => $client->client_db
           ]);
-          return redirect()->route('dashboard');
+          return redirect()->route('hc-openlist');
         }else{
           return redirect()->route('login')->with('error', '沒有對應的機構');
         }
