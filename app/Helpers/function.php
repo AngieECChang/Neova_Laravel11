@@ -74,3 +74,18 @@
       return $chunks->toArray();
     }
   }
+
+  if (!function_exists('mapRequestData')) {
+    /**
+     * 根據欄位對應表轉換 request 輸入值為資料庫對應格式
+     * @param \Illuminate\Http\Request $request
+     * @param array $map 例如 ['PhoneNumber' => 'phone']
+     * @return array
+     */
+    function mapRequestData($request, array $map)
+    {
+      return collect($map)->mapWithKeys(function ($dbColumn, $requestKey) use ($request) {
+        return [$dbColumn => $request->input($requestKey)];
+      })->toArray();
+    }
+  }
