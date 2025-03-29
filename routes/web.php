@@ -37,10 +37,10 @@ Route::middleware(['auth.session'])->group(function () {
   Route::post('/delete-close/{id}', [CaseController::class, 'delete_close'])->name('hc-delete_close');
   // 顯示表單
   Route::get('/get-evaluation-dates/{formID}/{caseID}', [EvaluationController::class, 'getEvaluationDates']);
-  Route::middleware(['loadEmployeesByIdNo'])->group(function () {
-    Route::get('/hcevaluation/{formID}/{caseID}/{date?}', [EvaluationController::class, 'showEvaluationForm']);  //{date?} → date 是可選的，如果沒有日期，就顯示「無紀錄的表單」
+  // Route::middleware(['loadEmployeesByIdNo'])->group(function () {
+    Route::get('/hcevaluation/{formID}/{caseID}/{date?}', [EvaluationController::class, 'showEvaluationForm'])->name('hcevaluation.edit');  //{date?} → date 是可選的，如果沒有日期，就顯示「無紀錄的表單」
     Route::get('/print/hcevaluation/{formID}/{caseID}/{date?}', [EvaluationController::class, 'print'])->name('hcevaluation.print');
-  });
+  // });
   Route::post('/hcevaluation/save', [EvaluationController::class, 'save'])->name('hcevaluation.save');
   // Route::get('/hcevaluation/{formID}/{caseID}', [EvaluationController::class, 'show'])->name('hcevaluation.{formID}');
   Route::get('/personnel/employeelist', [EmployeeListController::class, 'showlist']);
