@@ -24,6 +24,7 @@ class Kernel extends HttpKernel
         \App\Http\Middleware\ClientDataMiddleware::class,
         \App\Http\Middleware\CaseDataMiddleware::class,
         \App\Http\Middleware\TrimAllStrings::class,
+        \App\Http\Middleware\EmployeeDataMiddleware::class,
     ];
 
     /**
@@ -44,6 +45,7 @@ class Kernel extends HttpKernel
             \App\Http\Middleware\ClientDataMiddleware::class,
             \App\Http\Middleware\CaseDataMiddleware::class,
             \App\Http\Middleware\TrimAllStrings::class,
+            \App\Http\Middleware\EmployeeDataMiddleware::class,
         ],
 
         'api' => [
