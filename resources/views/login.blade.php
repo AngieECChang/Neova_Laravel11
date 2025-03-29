@@ -5,7 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>使用者登入</title>
   <!-- 加入 Bootstrap CSS -->
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
   <style>
     body {
       background-color: #f8f9fa;
@@ -41,7 +42,12 @@
       </div>
       <div class="mb-3">
         <label class="form-label">密碼：</label>
-        <input type="password" name="password" class="form-control" placeholder="請輸入密碼" required>
+        <div class="input-group">
+          <input type="password" id="password" name="password" class="form-control" placeholder="請輸入密碼" required>
+          <span class="input-group-text" style="cursor: pointer;" onclick="togglePasswordVisibility()">
+            <i class="bi bi-eye-slash" id="toggleIcon"></i>
+          </span>
+        </div>
       </div>
       <button type="submit" class="btn btn-primary w-100">登入</button>
     </form>
@@ -49,5 +55,21 @@
 </div>
 <!-- Bootstrap JS -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+function togglePasswordVisibility() {
+  const passwordInput = document.getElementById("password");
+  const toggleIcon = document.getElementById("toggleIcon");
+
+  if (passwordInput.type === "password") {
+    passwordInput.type = "text";
+    toggleIcon.classList.remove("bi-eye-slash");
+    toggleIcon.classList.add("bi-eye");
+  } else {
+    passwordInput.type = "password";
+    toggleIcon.classList.remove("bi-eye");
+    toggleIcon.classList.add("bi-eye-slash");
+  }
+}
+</script>
 </body>
 </html>
