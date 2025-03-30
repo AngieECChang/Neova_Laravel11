@@ -62,7 +62,7 @@
 </div>
 <div class="card shadow-sm mb-2">
   <div class="card-body" style="max-height: 570px; overflow-y: auto;">
-    <form method="POST" action="{{ route('hcevaluation.save') }}" enctype="multipart/form-data">
+    <form id="form1" method="POST" action="{{ route('hcevaluation.save') }}" enctype="multipart/form-data">
       @csrf
       <input type="hidden" name="caseID" value="{{ $the_case->caseID ?? '0' }}">
       <table class="table table-bordered align-middle">
@@ -430,6 +430,13 @@
         </tbody>
       </table>
       <input type="hidden" name="formID" value="hcevaluation01">
+      <div>
+        @include('hcevaluation.form01_medical')
+      </div>
+      <br>
+      <div>
+        <!-- @include('hcevaluation.form01_relative') -->
+      </div>
       @if(request()->segment(3)!="0")
         <div class="text-center mt-4">
           <button type="submit" class="btn btn-primary">儲存</button>

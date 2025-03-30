@@ -46,6 +46,19 @@ class EvaluationController extends Controller
       ->where('caseID', $caseID)
       ->where('date', $date)
       ->first();
+
+      if($formID=="form01"){
+        $medical_result = $db->table('hcevaluation01_medicals')
+        ->where('caseID', $caseID)
+        ->where('date', $date)
+        ->get();
+
+        
+        // $relative_result = $db->table('hcevaluation01_relatives')
+        // ->where('caseID', $caseID)
+        // ->where('date', $date)
+        // ->get();
+      }
     }else{
       $result = $db->table($form)
       ->where('caseID', $caseID)
@@ -56,12 +69,24 @@ class EvaluationController extends Controller
     if(!$result){
       $result = (object)array_fill_keys(\Schema::getColumnListing($form), null);
     }
+    if($formID=="form01"){
+      if(empty($medical_result)){
+        $medical_result = (object)array_fill_keys(\Schema::getColumnListing('hcevaluation01_medicals'), null);
+      }
+      // if(empty($relative_result)){
+      //   $relative_result = (object)array_fill_keys(\Schema::getColumnListing('hcevaluation01_relatives'), null);
+      // }
+    }
 
     // 取得住院及結案資訊
     $case_open = $db->table('case_open')->where('caseID', $caseID)->orderByDesc('open_date')->first();
     $case_closed = $db->table('case_closed')->where('caseID', $caseID)->orderByDesc('close_date')->first();
 
-    return view('hcevaluation.'.$formID, compact('the_case', 'result', 'case_open', 'case_closed', 'formID', 'caseID', 'date'));
+    if($formID=="form01"){
+      return view('hcevaluation.'.$formID, compact('the_case', 'result', 'case_open', 'case_closed', 'formID', 'caseID', 'date', 'medical_result'));
+    }else{
+      return view('hcevaluation.'.$formID, compact('the_case', 'result', 'case_open', 'case_closed', 'formID', 'caseID', 'date'));
+    }
   }
 
   public function print($formID, $caseID, $date = null)
@@ -84,11 +109,30 @@ class EvaluationController extends Controller
       ->where('caseID', $caseID)
       ->where('date', $date)
       ->first();
+      if($formID=="form01"){
+        $medical_result = $db->table('hcevaluation01_medicals')
+        ->where('caseID', $caseID)
+        ->where('date', $date)
+        ->first();
+        
+        $relative_result = $db->table('hcevaluation01_relatives')
+        ->where('caseID', $caseID)
+        ->where('date', $date)
+        ->first();
+      }
     }else{
       $result = $db->table($form)
       ->where('caseID', $caseID)
       ->orderByDesc('date')
       ->first();
+    }
+    if($formID=="form01"){
+      if(!$medical_result){
+        $medical_result = (object)array_fill_keys(\Schema::getColumnListing('hcevaluation01_medicals'), null);
+      }
+      if(!$relative_result){
+        $relative_result = (object)array_fill_keys(\Schema::getColumnListing('hcevaluation01_relatives'), null);
+      }
     }
 
     if(!$result){
@@ -97,8 +141,11 @@ class EvaluationController extends Controller
     // 取得住院及結案資訊
     $case_open = $db->table('case_open')->where('caseID', $caseID)->orderByDesc('open_date')->first();
     $case_closed = $db->table('case_closed')->where('caseID', $caseID)->orderByDesc('close_date')->first();
-    
-    return view('print.hcevaluation.'.$formID, compact('the_case', 'result', 'case_open', 'case_closed', 'formID', 'caseID', 'date'));
+    if($formID=="form01"){
+      return view('hcevaluation.'.$formID, compact('the_case', 'result', 'case_open', 'case_closed', 'formID', 'caseID', 'date', 'medical_result', 'relative_result'));
+    }else{
+      return view('hcevaluation.'.$formID, compact('the_case', 'result', 'case_open', 'case_closed', 'formID', 'caseID', 'date'));
+    }
   }
 
   public function save(Request $request)
@@ -135,7 +182,14 @@ class EvaluationController extends Controller
     // 分類要存入的資料（可根據你的資料欄位需求再分）
     if($formID=="hcevaluation01"){
       $basicData = $request->only(['caseID', 'name', 'gender', 'birthdate', 'IdNo']);
-      $formData = $request->except(['_token', 'formID', 'name', 'gender', 'old_photo_url', 'photo_url', 'birthdate', 'IdNo']);
+      // $formData = $request->except(['_token', 'formID', 'name', 'gender', 'old_photo_url', 'photo_url', 'birthdate', 'IdNo']);
+      $formData = collect($request->except([
+        '_token', 'formID', 'name', 'gender', 'old_photo_url', 'photo_url', 'birthdate', 'IdNo'
+      ]))
+      ->reject(function ($value, $key) {
+          return preg_match('/^form01/', $key);
+      })
+      ->toArray();
       
       //把 $formData 陣列中所有 null 的欄位都換成空字串（''），其他欄位保持原樣
       $formData = array_map(function ($value) {
@@ -163,6 +217,7 @@ class EvaluationController extends Controller
       if ($exists) {
           // 更新
           $formData['updated_by'] = session('user_id') ?? 'Auto';
+          $formData['updated_at'] = date('Y-m-d H:i:s');
       } else {
           // 新增
           $formData['created_by'] = session('user_id') ?? 'Auto';
@@ -171,6 +226,33 @@ class EvaluationController extends Controller
         ['caseID' => $caseID, 'date' => $date],
         $formData
       );
+
+      //共照團隊醫事人員
+      $names = $request->input('form01Name', []);
+      $careDates = $request->input('form01CareDate', []);
+      $idNos = $request->input('form01IdNo', []);
+      $jobTitles = $request->input('form01_JobTitle', []);
+      $jobTitleOthers = $request->input('form01_1JobTitleOther', []);
+      $tels = $request->input('form01Tel', []);
+      $remarks = $request->input('form01CareRemark', []);
+
+      foreach ($names as $i => $name) {
+        if (trim($name) === '') continue; // 跳過空白姓名
+        $db->table('hcevaluation01_medicals')->insert([
+          'caseID'         => $caseID,
+          'date'           => $date,
+          'Name'           => $name,
+          'CareDate'       => $careDates[$i] ?? '0000-00-00',
+          'IdNo'           => $idNos[$i] ?? '',
+          'JobTitle'       => $jobTitles[$i] ?? '',
+          'JobTitleOther'  => $jobTitleOthers[$i] ?? '',
+          'Tel'            => $tels[$i] ?? '',
+          'CareRemark'     => $remarks[$i] ?? '',
+          'created_by'     => session('user_id'),
+          'created_at'     => now()
+        ]);
+      }
+
     }
 
     return redirect()->back()->with('success', '資料已成功儲存');
