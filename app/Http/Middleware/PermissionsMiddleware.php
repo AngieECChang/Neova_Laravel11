@@ -37,7 +37,7 @@ class PermissionsMiddleware
 
       $cities = DB::table('mohw_areacode')->select('city_name')->groupBy('city_name', 'order')->orderBy('order')->pluck('city_name')->toArray();
 
-      $users = $db->table('users')
+      $users = DB::table('users')
       ->select('user_id', 'name')
       ->get();
 
