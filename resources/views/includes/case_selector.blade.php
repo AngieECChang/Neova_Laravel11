@@ -9,7 +9,7 @@
             <option value="">請選擇</option>
             @foreach ($open_cases as $case)
                 <option value="{{ $case->caseID }}" {{ ($the_case->caseID ?? '') == $case->caseID ? 'selected' : '' }}>
-                    {{ $case->name." 【".(string)$case->caseNoDisplay."】" }}
+                  {{ $case->name." 【".(string)$case->caseNoDisplay."】" }}
                 </option>
             @endforeach
         </select>
@@ -26,6 +26,7 @@
   </div>
 </div>
 <input type="hidden" id="formID" value="{{ $formID ?? '' }}">
+<input type="hidden" id="selectedDate" value="{{ optional($result)->date ?? '' }}">
 <input type="hidden" id="print_url">
 <script>
   $('#selectCase').select2({
@@ -37,33 +38,17 @@
     let selectCase = document.getElementById("selectCase");
     let selectDate = document.getElementById("selectDate");
     let formID = document.getElementById("formID")?.value || '';  // 取得 formID
-    
+    // let selectedDateVal = document.getElementById('selectedDate')?.value || '';
+
+    // 頁面載入時如果已選個案 → 也載入日期清單
+    if (selectCase.value && formID) {
+      loadEvaluationDates(formID, selectCase.value, true); // ✅ 再次呼叫
+    }
     // 當選擇個案時，載入該個案的所有評估日期
     $('#selectCase').on('change', function () {
       let caseID = this.value;
-      selectDate.innerHTML = '<option value="">請先選擇個案</option>';
-      selectDate.disabled = true;
-
-      if (!caseID || !formID) return;
-
-      fetch(`/get-evaluation-dates/${formID}/${caseID}`)
-        .then(response => response.json())
-        .then(data => {
-          if (data.no_records) {
-            // **沒有紀錄時，直接跳轉**
-            window.location.href = `/hcevaluation/${formID}/${caseID}`;
-            return;
-          }
-          selectDate.innerHTML = '<option value="">請選擇日期</option>';
-          data.forEach(date => {
-              let option = document.createElement("option");
-              option.value = date;
-              option.textContent = date;
-              selectDate.appendChild(option);
-          });
-          selectDate.disabled = false;
-        })
-        .catch(error => console.error('Error:', error));
+      localStorage.setItem('remember_case', caseID);
+      loadEvaluationDates(formID, caseID, false);
     });
 
     // 當選擇日期時，根據 formid、caseID 和 date 轉跳到相應表單
@@ -76,4 +61,39 @@
       window.location.href = `/hcevaluation/${formID}/${caseID}/${date}`;
     });
   });
+
+  function loadEvaluationDates(formID, caseID, isInit = false) {
+    let selectedDate = document.getElementById("selectedDate").value;
+
+    fetch(`/get-evaluation-dates/${formID}/${caseID}`)
+    .then(response => {
+      if (!response.ok) throw new Error("Fetch failed");
+      return response.json();
+    })
+    .then(data => {
+      if (data.no_records) {
+        selectDate.innerHTML = '<option value="">沒有紀錄</option>';
+        selectDate.disabled = true;
+        if (!isInit) {
+          window.location.href = `/hcevaluation/${formID}/${caseID}`;
+        }
+        return;
+      }
+
+      selectDate.innerHTML = '<option value="">請選擇日期</option>';
+      data.forEach(date => {
+        let option = document.createElement("option");
+        option.value = date;
+        option.textContent = date;
+        if (date.trim() === selectedDate.trim()) {
+          option.selected = true;
+        }
+        selectDate.appendChild(option);
+      });
+
+      selectDate.disabled = false;
+    })
+    .catch(error => console.error('Error:', error));
+  }
+
 </script>

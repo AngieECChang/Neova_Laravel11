@@ -414,7 +414,7 @@
               <select name="employeeID" id="employeeID" class="form-control" style="width:250px;">
                 <option value=""></option>
                 @foreach ($open_staffs_withIdNo as $emp)
-                  <option value="{{ $emp->employeeID }}" class="employee" {{ optional($result)->employeeID == $emp->employeeID ?'selected':''}}>
+                  <option value="{{ $emp->employeeID }}" class="employee" {{ optional($result)->employeeID == $emp->employeeID ?'selected':''}} data-id="{{ $emp->IdNo }}">
                     {{ maskIdNo($emp->IdNo) }} - {{ $emp->name }}
                   </option>
                 @endforeach
@@ -424,7 +424,7 @@
                   </option>
                 @endif
               </select>
-              <input type="hidden" name="NurseID" id="NurseID">
+              <input type="hidden" name="NurseID" id="NurseID" value="{{ optional($result)->NurseID }}">
             </td>
           </tr>
         </tbody>
@@ -544,6 +544,12 @@
         });
         $('#CaregiverAddress_town').html(options);
       });
+    });
+
+    $('#employeeID').on('change', function () {
+      let selectedOption = $(this).find('option:selected');
+      let dataId = selectedOption.data('id');
+      $('#NurseID').val(dataId);
     });
   });
 </script>

@@ -155,8 +155,20 @@ class EvaluationController extends Controller
 
       $db->table('cases')->where('caseID', $caseID)->update($basicData);
 
+      $exists = $db->table($formID)
+        ->where('caseID', $caseID)
+        ->where('date', $date)
+        ->exists();
+
+      if ($exists) {
+          // 更新
+          $formData['updated_by'] = session('user_id') ?? 'Auto';
+      } else {
+          // 新增
+          $formData['created_by'] = session('user_id') ?? 'Auto';
+      }
       $db->table($formID)->updateOrInsert(
-        ['caseID' => $request->input('caseID'), 'date' => $request->input('date')],
+        ['caseID' => $caseID, 'date' => $date],
         $formData
       );
     }
