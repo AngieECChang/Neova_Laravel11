@@ -37,10 +37,17 @@ class PermissionsMiddleware
 
       $cities = DB::table('mohw_areacode')->select('city_name')->groupBy('city_name', 'order')->orderBy('order')->pluck('city_name')->toArray();
 
+      $users = $db->table('users')
+      ->select('user_id', 'name')
+      ->get();
+
+      $users_arrayinfo = $users->pluck('name', 'user_id')->toArray();
+
       // 共享數據到所有視圖
       // View::share(['allow_permission', $permissions, 'cities', $cities]);
       View::share('allow_permission', $permissions);
       View::share('cities', $cities);
+      View::share('users_arrayinfo', $users_arrayinfo);
       // dd($permissions->toArray()); // 測試 Middleware 是否正常運作
     }
 
