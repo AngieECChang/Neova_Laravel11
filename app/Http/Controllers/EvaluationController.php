@@ -11,19 +11,32 @@ class EvaluationController extends Controller
 {
   public function getEvaluationDates($formID, $caseID)
   {
-    $databaseName = session('DB'); // 可根據條件動態變更
-    $db = DatabaseConnectionService::setConnection($databaseName);
-    $form = str_replace("form","hcevaluation",$formID);
+    try {
+      $databaseName = session('DB'); // 可根據條件動態變更
+      if (!$databaseName) {
+        return response()->json(['error' => 'No database session found'], 500);
+      }
+      $db = DatabaseConnectionService::setConnection($databaseName);
+      $form = str_replace("form","hcevaluation",$formID);
 
-    $dates = $db->table($form)
-      ->where('caseID', $caseID)
-      ->orderBy('date', 'desc')
-      ->pluck('date');
-    // **如果沒有紀錄，直接返回 `no_records`**
-    if ($dates->isEmpty()) {
-      return response()->json(['no_records' => true]);
+      $dates = $db->table($form)
+        ->where('caseID', $caseID)
+        ->orderBy('date', 'desc')
+        ->pluck('date');
+      // **如果沒有紀錄，直接返回 `no_records`**
+      if ($dates->isEmpty()) {
+        return response()->json(['no_records' => true]);
+      }
+      return response()->json($dates);
+    }catch (\Exception $e) {
+      \Log::error("🚨 取得個案評估日期失敗", [
+          'formID' => $formID,
+          'caseID' => $caseID,
+          'error' => $e->getMessage()
+      ]);
+
+      return response()->json(['error' => '伺服器發生錯誤'], 500);
     }
-    return response()->json($dates);
   }
 
   public function showEvaluationForm($formID, $caseID, $date = null)
@@ -51,6 +64,7 @@ class EvaluationController extends Controller
         $medical_result = $db->table('hcevaluation01_medicals')
         ->where('caseID', $caseID)
         ->where('date', $date)
+        ->orderBy('CareDate')
         ->get();
 
         
@@ -156,7 +170,7 @@ class EvaluationController extends Controller
     $formID = $request->input('formID');
     $caseID = $request->input('caseID');
     $date = $request->input('date');
-
+    // dd($request->all());
     $photoUrl = $request->input('old_photo_url'); // 預設為舊的 URL
     // 如果有上傳新檔案，就取代原圖
     if ($request->hasFile('photo_url') && $request->file('photo_url')->isValid()) {
@@ -227,17 +241,88 @@ class EvaluationController extends Controller
         $formData
       );
 
-      //共照團隊醫事人員
+      // $preview = [
+      //   'delete' => [],
+      //   'update' => [],
+      //   'insert' => [],
+      // ];
+      //共照團隊醫事人員，刪除、修改
+      $deletedIds = array_filter(array_map('trim', explode(',', (string) $request->input('form01_deleted_ids', ''))));
+      foreach ($deletedIds as $id) {
+        if (!empty($id)) {
+          // $preview['delete'][] = "1. DELETE FROM hcevaluation01_medicals WHERE id = $id";
+          $db->table('hcevaluation01_medicals')->where('id', $id)->delete();
+        }
+      }
+      
+      $infoNos = array_filter(array_map('trim', explode(',', $request->input('form01_infoNo', ''))));
+      $oldNames = $request->input('form01_oldName', []);   
+      // $preview['update'][] = [
+      //   'all' => $request->all(),
+      //   'infoNos' => $infoNos,
+      //   'oldNames' => $oldNames,
+      // ];
+      foreach ($infoNos as $i => $id) {
+        if (!isset($oldNames[$id])) continue;
+        $name = trim($oldNames[$id]);
+        if ($name === '') {
+          // 空姓名視為刪除
+          // $preview['delete'][] = "2. DELETE FROM hcevaluation01_medicals WHERE id = $id";
+          $db->table('hcevaluation01_medicals')->where('id', $id)->delete();
+          continue;
+        }
+        // $data = [
+        //   'Name' => $request->form01_oldName[$id],
+        //   'CareDate' => $request->form01_oldCareDate[$id]?? '',
+        //   'IdNo' => $request->form01_oldIdNo[$id]?? '',
+        //   'JobTitle' => $request->form01_oldJobTitle[$id]?? '',
+        //   'JobTitleOther' => $request->form01_oldJobTitleOther[$id] ?? '',
+        //   'Tel' => $request->form01_oldTel[$id]?? '',
+        //   'CareRemark' => $request->form01_oldCareRemark[$id]?? '',
+        //   'updated_by' => session('user_id'),
+        //   'updated_at' => now()
+        // ];
+        // $preview['update'][] = [
+        //     'id' => $id,
+        //     'data' => $data,
+        // ];
+        $db->table('hcevaluation01_medicals')->where('id', $id)->update([
+          'Name' => $request->form01_oldName[$id],
+          'CareDate' => $request->form01_oldCareDate[$id]?? '',
+          'IdNo' => $request->form01_oldIdNo[$id]?? '',
+          'JobTitle' => $request->form01_oldJobTitle[$id]?? '',
+          'JobTitleOther' => $request->form01_oldJobTitleOther[$id] ?? '',
+          'Tel' => $request->form01_oldTel[$id]?? '',
+          'CareRemark' => $request->form01_oldCareRemark[$id]?? '',
+          'updated_by' => session('user_id'),
+          'updated_at' => now()
+        ]);
+      }
+     
+      //共照團隊醫事人員，新增
       $names = $request->input('form01Name', []);
       $careDates = $request->input('form01CareDate', []);
       $idNos = $request->input('form01IdNo', []);
-      $jobTitles = $request->input('form01_JobTitle', []);
-      $jobTitleOthers = $request->input('form01_1JobTitleOther', []);
+      $jobTitles = $request->input('form01JobTitle', []);
+      $jobTitleOthers = $request->input('form01JobTitleOther', []);
       $tels = $request->input('form01Tel', []);
       $remarks = $request->input('form01CareRemark', []);
 
       foreach ($names as $i => $name) {
         if (trim($name) === '') continue; // 跳過空白姓名
+        // $preview['insert'][] = [
+        //   'caseID'         => $caseID,
+        //   'date'           => $date,
+        //   'Name'           => $name,
+        //   'CareDate'       => $careDates[$i] ?? '0000-00-00',
+        //   'IdNo'           => $idNos[$i] ?? '',
+        //   'JobTitle'       => $jobTitles[$i] ?? '',
+        //   'JobTitleOther'  => $jobTitleOthers[$i] ?? '',
+        //   'Tel'            => $tels[$i] ?? '',
+        //   'CareRemark'     => $remarks[$i] ?? '',
+        //   'created_by'     => session('user_id'),
+        //   'created_at'     => now()
+        // ];
         $db->table('hcevaluation01_medicals')->insert([
           'caseID'         => $caseID,
           'date'           => $date,
@@ -252,7 +337,7 @@ class EvaluationController extends Controller
           'created_at'     => now()
         ]);
       }
-
+      // dd($preview); // 顯示所有模擬動作
     }
 
     return redirect()->back()->with('success', '資料已成功儲存');
