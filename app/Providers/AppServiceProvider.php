@@ -6,6 +6,7 @@ use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\View;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
 use App\Http\Controllers\AddressController;
@@ -33,6 +34,7 @@ class AppServiceProvider extends ServiceProvider
 	 */
 	public function boot()
 	{
+		Schema::defaultStringLength(191); // 解決 key 太長的問題
 		// 註冊 API 路由（讓 Blade 前端能 AJAX 使用）
 		Route::middleware('web')->get('/api/towns', [AddressController::class, 'getTowns']);
 	}
