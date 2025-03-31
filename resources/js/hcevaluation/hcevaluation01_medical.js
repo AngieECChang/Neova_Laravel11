@@ -1,9 +1,6 @@
 function RemoveRow(id) {
   $('#removed' + id).val("1");
   $('#row' + id).remove();
-  if ((parseInt($('#form01_fileCount').val()) <= 1) && ($('#form01_oldCount').val() == 0)) {
-    $("#submit").hide();
-  }
 }
 
 $(function () {
@@ -57,7 +54,6 @@ $(function () {
     $('#form01_addShow').show();
     $('#form01_Title').show();
     $('#form01Body').appendDom(row);
-    $('#form01_fileCount').val(count);
     $('#submit').show();
 
     $('select.form01JobTitle').off('change').on('change', function () {
