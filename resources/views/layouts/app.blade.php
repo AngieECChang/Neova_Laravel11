@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
   <title>諾歐科技</title>
+  <link rel="icon" href="{{ asset('favicon.png') }}" type="image/x-icon">
   @include('layouts.meta')
   @include('layouts.css')
 </head>
