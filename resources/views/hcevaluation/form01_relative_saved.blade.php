@@ -43,9 +43,9 @@
         <td align="center">
           <select class="form-select form-select-sm" name="form01_1oldCareTime[{{$relative->id}}]" id="form01_1oldCareTime_{{ $relative->id }}" style="width: 120px;">
             <option value=""></option>
-            <option value="白天">白天</option>
-            <option value="晚上">晚上</option>
-            <option value="其他">其他</option>
+            <option value="白天" {{ $relative->CareTime === '白天' ? 'selected' : '' }}>白天</option>
+            <option value="晚上" {{ $relative->CareTime === '晚上' ? 'selected' : '' }}>晚上</option>
+            <option value="其他" {{ $relative->CareTime === '其他' ? 'selected' : '' }}>其他</option>
           </select>
           @if($relative->CareTimeOther || $relative->CareTime==="其他")
             <input type="text" class="form-control form-control-sm mt-1" name="form01_1oldCareTimeOther[{{$relative->id}}]" id="form01_1oldCareTimeOther_{{ $relative->id }}" value="{{ $relative->CareTimeOther }}">
@@ -54,9 +54,6 @@
               <input type="text" class="form-control form-control-sm" name="form01_1oldCareTimeOther[{{$relative->id}}]" id="form01_1oldCareTimeOther_{{ $relative->id }}">
             </div>
           @endif
-        </td>
-        <td align="center">
-          <input type="text" class="form-control form-control-sm" name="form01_oldCareDate[{{$relative->id}}]" id="form01_oldCareDate_{{ $relative->id }}" value="{{ $relative->CareDate }}">
         </td>
         <td align="center">
           <input type="text" class="form-control form-control-sm" name="form01_1oldTel1[{{$relative->id}}]" value="{{ $relative->Tel1}}"><br>
@@ -71,7 +68,7 @@
           <input type="text" class="form-control form-control-sm" name="form01_1oldTel3Remark[{{$relative->id}}]" value="{{ $relative->Tel3Remark}}">
         </td>
         <td>
-          <textarea class="form-control form-control-sm" name="form01_oldRemark[{{$relative->id}}]" rows="2" maxlength="1000">{{ $relative->Remark }}</textarea>
+          <textarea class="form-control form-control-sm" name="form01_1oldRemark[{{$relative->id}}]" rows="2" maxlength="1000">{{ $relative->Remark }}</textarea>
         </td>
         <td align="center">{{ $users_arrayinfo[$relative->created_by]}}</td>
         <td align="center">

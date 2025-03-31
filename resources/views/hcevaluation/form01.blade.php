@@ -437,6 +437,12 @@
         @include('hcevaluation.form01_medical')
       </div>
       <br>
+      <div>
+        @include('hcevaluation.form01_relative_saved')
+      </div>
+      <div>
+        @include('hcevaluation.form01_relative')
+      </div>
       @if(request()->segment(3)!="0")
         <div class="text-center mt-4">
           <button type="submit" class="btn btn-primary">儲存</button>

@@ -301,57 +301,26 @@ class EvaluationController extends Controller
         ]);
       }
 
-      // $preview = [
-      //   'delete' => [],
-      //   'update' => [],
-      //   'insert' => [],
-      // ];
-
       //共照團隊親友，刪除、修改
       $deletedIds_relative = array_filter(array_map('trim', explode(',', (string) $request->input('form01_1deleted_ids', ''))));
       foreach ($deletedIds_relative as $id) {
         if (!empty($id)) {
-          // $preview['delete'][] = "1. DELETE FROM hcevaluation01_medicals WHERE id = $id";
           $db->table('hcevaluation01_relatives')->where('id', $id)->delete();
         }
       }
       
       $infoNos_relative = array_filter(array_map('trim', explode(',', $request->input('form01_1infoNo', ''))));
       $oldNames_relative = $request->input('form01_1oldRelativesName', []);  
-      // $preview['update'][] = [
-      //   'all' => $request->all(),
-      //   'infoNos' => $infoNos_relative,
-      //   'oldNames' => $oldNames_relative,
-      // ]; 
+ 
       foreach ($infoNos_relative as $i => $id) {
         if (!isset($oldNames_relative[$id])) continue;
         $name = trim($oldNames_relative[$id]);
         if ($name === '') {
           // 空姓名視為刪除
-          // $preview['delete'][] = "2. DELETE FROM hcevaluation01_medicals WHERE id = $id";
           $db->table('hcevaluation01_relatives')->where('id', $id)->delete();
           continue;
         }
-        //  $data = [
-        //   'Name' => $request->form01_1oldRelativesName[$id],
-        //   'Relationship' => $request->form01_1oldRelationship[$id]?? '',
-        //   'RelationshipOther' => $request->form01_1oldRelationshipOther[$id]?? '',
-        //   'CareTime' => $request->form01_1oldCareTime[$id]?? '',
-        //   'CareTimeOther' => $request->form01_1oldCareTimeOther[$id] ?? '',
-        //   'Tel1' => $request->form01_1oldTel1[$id]?? '',
-        //   'Tel1Remark' => $request->form01_1oldTel1Remark[$id]?? '',
-        //   'Tel2' => $request->form01_1oldTel2[$id]?? '',
-        //   'Tel2Remark' => $request->form01_1oldTel2Remark[$id]?? '',
-        //   'Tel3' => $request->form01_1oldTel3[$id]?? '',
-        //   'Tel3Remark' => $request->form01_1oldTel3Remark[$id]?? '',
-        //   'Remark' => $request->form01_1oldRemark[$id]?? '',
-        //   'updated_by' => session('user_id'),
-        //   'updated_at' => now()
-        // ];
-        // $preview['update'][] = [
-        //     'id' => $id,
-        //     'data' => $data,
-        // ];
+
         $db->table('hcevaluation01_relatives')->where('id', $id)->update([
           'Name' => $request->form01_1oldRelativesName[$id],
           'Relationship' => $request->form01_1oldRelationship[$id]?? '',
@@ -385,25 +354,7 @@ class EvaluationController extends Controller
       $remarks = $request->input('form01_1RelativesRemark', []);
 
       foreach ($names as $i => $name) {
-        if (trim($name) === '') continue; // 跳過空白姓名
-        // $preview['insert'][] = [
-        //   'caseID'            => $caseID,
-        //   'date'              => $date,
-        //   'Name'              => $name,
-        //   'Relationship'      => $relationships[$i] ?? '',
-        //   'RelationshipOther' => $relationshipOthers[$i] ?? '',
-        //   'CareTime'          => $careTimes[$i] ?? '',
-        //   'CareTimeOther'     => $careTimeOthers[$i] ?? '',
-        //   'Tel1'              => $tel1s[$i] ?? '',
-        //   'Tel1Remark'        => $tel1Remarks[$i] ?? '',
-        //   'Tel2'              => $tel2s[$i] ?? '',
-        //   'Tel2Remark'        => $tel2Remarks[$i] ?? '',
-        //   'Tel3'              => $tel3s[$i] ?? '',
-        //   'Tel3Remark'        => $tel3Remarks[$i] ?? '',
-        //   'Remark'            => $remarks[$i] ?? '',
-        //   'created_by'        => session('user_id'),
-        //   'created_at'        => now()
-        // ];
+        if (trim($name) === '') continue; // 跳過空白姓名 
         $db->table('hcevaluation01_relatives')->insert([
           'caseID'            => $caseID,
           'date'              => $date,
@@ -423,7 +374,6 @@ class EvaluationController extends Controller
           'created_at'        => now()
         ]);
       }
-      // dd($preview); // 顯示所有模擬動作
     }  //endif(hcevaluation01)
 
     return redirect()->back()->with('success', '資料已成功儲存');
