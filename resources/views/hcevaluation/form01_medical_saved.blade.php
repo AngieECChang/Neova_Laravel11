@@ -1,4 +1,4 @@
-@if(!empty((array)$medical_result))
+@if(optional($medical_result)->isNotEmpty())
   <table class="table table-bordered">
     <thead>
       <tr>
