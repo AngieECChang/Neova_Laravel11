@@ -66,12 +66,12 @@ class EvaluationController extends Controller
         ->where('date', $date)
         ->orderBy('CareDate')
         ->get();
-
         
-        // $relative_result = $db->table('hcevaluation01_relatives')
-        // ->where('caseID', $caseID)
-        // ->where('date', $date)
-        // ->get();
+        $relative_result = $db->table('hcevaluation01_relatives')
+        ->where('caseID', $caseID)
+        ->where('date', $date)
+        ->orderBy('id')
+        ->get();
       }
     }else{
       $result = $db->table($form)
@@ -87,9 +87,9 @@ class EvaluationController extends Controller
       if(empty($medical_result)){
         $medical_result = (object)array_fill_keys(\Schema::getColumnListing('hcevaluation01_medicals'), null);
       }
-      // if(empty($relative_result)){
-      //   $relative_result = (object)array_fill_keys(\Schema::getColumnListing('hcevaluation01_relatives'), null);
-      // }
+      if(empty($relative_result)){
+        $relative_result = (object)array_fill_keys(\Schema::getColumnListing('hcevaluation01_relatives'), null);
+      }
     }
 
     // 取得住院及結案資訊
@@ -97,7 +97,7 @@ class EvaluationController extends Controller
     $case_closed = $db->table('case_closed')->where('caseID', $caseID)->orderByDesc('close_date')->first();
 
     if($formID=="form01"){
-      return view('hcevaluation.'.$formID, compact('the_case', 'result', 'case_open', 'case_closed', 'formID', 'caseID', 'date', 'medical_result'));
+      return view('hcevaluation.'.$formID, compact('the_case', 'result', 'case_open', 'case_closed', 'formID', 'caseID', 'date', 'medical_result', 'relative_result'));
     }else{
       return view('hcevaluation.'.$formID, compact('the_case', 'result', 'case_open', 'case_closed', 'formID', 'caseID', 'date'));
     }
@@ -127,12 +127,14 @@ class EvaluationController extends Controller
         $medical_result = $db->table('hcevaluation01_medicals')
         ->where('caseID', $caseID)
         ->where('date', $date)
-        ->first();
+        ->orderBy('CareDate')
+        ->get();
         
         $relative_result = $db->table('hcevaluation01_relatives')
         ->where('caseID', $caseID)
         ->where('date', $date)
-        ->first();
+        ->orderBy('id')
+        ->get();
       }
     }else{
       $result = $db->table($form)
@@ -298,7 +300,131 @@ class EvaluationController extends Controller
           'created_at'     => now()
         ]);
       }
-    }
+
+      // $preview = [
+      //   'delete' => [],
+      //   'update' => [],
+      //   'insert' => [],
+      // ];
+
+      //共照團隊親友，刪除、修改
+      $deletedIds_relative = array_filter(array_map('trim', explode(',', (string) $request->input('form01_1deleted_ids', ''))));
+      foreach ($deletedIds_relative as $id) {
+        if (!empty($id)) {
+          // $preview['delete'][] = "1. DELETE FROM hcevaluation01_medicals WHERE id = $id";
+          $db->table('hcevaluation01_relatives')->where('id', $id)->delete();
+        }
+      }
+      
+      $infoNos_relative = array_filter(array_map('trim', explode(',', $request->input('form01_1infoNo', ''))));
+      $oldNames_relative = $request->input('form01_1oldRelativesName', []);  
+      // $preview['update'][] = [
+      //   'all' => $request->all(),
+      //   'infoNos' => $infoNos_relative,
+      //   'oldNames' => $oldNames_relative,
+      // ]; 
+      foreach ($infoNos_relative as $i => $id) {
+        if (!isset($oldNames_relative[$id])) continue;
+        $name = trim($oldNames_relative[$id]);
+        if ($name === '') {
+          // 空姓名視為刪除
+          // $preview['delete'][] = "2. DELETE FROM hcevaluation01_medicals WHERE id = $id";
+          $db->table('hcevaluation01_relatives')->where('id', $id)->delete();
+          continue;
+        }
+        //  $data = [
+        //   'Name' => $request->form01_1oldRelativesName[$id],
+        //   'Relationship' => $request->form01_1oldRelationship[$id]?? '',
+        //   'RelationshipOther' => $request->form01_1oldRelationshipOther[$id]?? '',
+        //   'CareTime' => $request->form01_1oldCareTime[$id]?? '',
+        //   'CareTimeOther' => $request->form01_1oldCareTimeOther[$id] ?? '',
+        //   'Tel1' => $request->form01_1oldTel1[$id]?? '',
+        //   'Tel1Remark' => $request->form01_1oldTel1Remark[$id]?? '',
+        //   'Tel2' => $request->form01_1oldTel2[$id]?? '',
+        //   'Tel2Remark' => $request->form01_1oldTel2Remark[$id]?? '',
+        //   'Tel3' => $request->form01_1oldTel3[$id]?? '',
+        //   'Tel3Remark' => $request->form01_1oldTel3Remark[$id]?? '',
+        //   'Remark' => $request->form01_1oldRemark[$id]?? '',
+        //   'updated_by' => session('user_id'),
+        //   'updated_at' => now()
+        // ];
+        // $preview['update'][] = [
+        //     'id' => $id,
+        //     'data' => $data,
+        // ];
+        $db->table('hcevaluation01_relatives')->where('id', $id)->update([
+          'Name' => $request->form01_1oldRelativesName[$id],
+          'Relationship' => $request->form01_1oldRelationship[$id]?? '',
+          'RelationshipOther' => $request->form01_1oldRelationshipOther[$id]?? '',
+          'CareTime' => $request->form01_1oldCareTime[$id]?? '',
+          'CareTimeOther' => $request->form01_1oldCareTimeOther[$id] ?? '',
+          'Tel1' => $request->form01_1oldTel1[$id]?? '',
+          'Tel1Remark' => $request->form01_1oldTel1Remark[$id]?? '',
+          'Tel2' => $request->form01_1oldTel2[$id]?? '',
+          'Tel2Remark' => $request->form01_1oldTel2Remark[$id]?? '',
+          'Tel3' => $request->form01_1oldTel3[$id]?? '',
+          'Tel3Remark' => $request->form01_1oldTel3Remark[$id]?? '',
+          'Remark' => $request->form01_1oldRemark[$id]?? '',
+          'updated_by' => session('user_id'),
+          'updated_at' => now()
+        ]);
+      }
+
+      //共照團隊親友，新增
+      $names = $request->input('form01_1RelativesName', []);
+      $relationships = $request->input('form01_1Relationship', []);
+      $relationshipOthers = $request->input('form01_1RelationshipOther', []);
+      $careTimes = $request->input('form01_1CareTime', []);
+      $careTimeOthers = $request->input('form01_1CareTimeOther', []);
+      $tel1s = $request->input('form01_1Tel1', []);
+      $tel1Remarks = $request->input('form01_1Tel1Remark', []);
+      $tel2s = $request->input('form01_1Tel2', []);
+      $tel2Remarks = $request->input('form01_1Tel2Remark', []);
+      $tel3s = $request->input('form01_1Tel3', []);
+      $tel3Remarks = $request->input('form01_1Tel3Remark', []);
+      $remarks = $request->input('form01_1RelativesRemark', []);
+
+      foreach ($names as $i => $name) {
+        if (trim($name) === '') continue; // 跳過空白姓名
+        // $preview['insert'][] = [
+        //   'caseID'            => $caseID,
+        //   'date'              => $date,
+        //   'Name'              => $name,
+        //   'Relationship'      => $relationships[$i] ?? '',
+        //   'RelationshipOther' => $relationshipOthers[$i] ?? '',
+        //   'CareTime'          => $careTimes[$i] ?? '',
+        //   'CareTimeOther'     => $careTimeOthers[$i] ?? '',
+        //   'Tel1'              => $tel1s[$i] ?? '',
+        //   'Tel1Remark'        => $tel1Remarks[$i] ?? '',
+        //   'Tel2'              => $tel2s[$i] ?? '',
+        //   'Tel2Remark'        => $tel2Remarks[$i] ?? '',
+        //   'Tel3'              => $tel3s[$i] ?? '',
+        //   'Tel3Remark'        => $tel3Remarks[$i] ?? '',
+        //   'Remark'            => $remarks[$i] ?? '',
+        //   'created_by'        => session('user_id'),
+        //   'created_at'        => now()
+        // ];
+        $db->table('hcevaluation01_relatives')->insert([
+          'caseID'            => $caseID,
+          'date'              => $date,
+          'Name'              => $name,
+          'Relationship'      => $relationships[$i] ?? '',
+          'RelationshipOther' => $relationshipOthers[$i] ?? '',
+          'CareTime'          => $careTimes[$i] ?? '',
+          'CareTimeOther'     => $careTimeOthers[$i] ?? '',
+          'Tel1'              => $tel1s[$i] ?? '',
+          'Tel1Remark'        => $tel1Remarks[$i] ?? '',
+          'Tel2'              => $tel2s[$i] ?? '',
+          'Tel2Remark'        => $tel2Remarks[$i] ?? '',
+          'Tel3'              => $tel3s[$i] ?? '',
+          'Tel3Remark'        => $tel3Remarks[$i] ?? '',
+          'Remark'            => $remarks[$i] ?? '',
+          'created_by'        => session('user_id'),
+          'created_at'        => now()
+        ]);
+      }
+      // dd($preview); // 顯示所有模擬動作
+    }  //endif(hcevaluation01)
 
     return redirect()->back()->with('success', '資料已成功儲存');
   }
