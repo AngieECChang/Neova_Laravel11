@@ -7,11 +7,15 @@
       <div class="col-4">
         <select class="form-control w-30 me-4" id="selectCase">
             <option value="">請選擇</option>
-            @foreach ($open_cases as $case)
+            @if (count($open_cases))
+              @foreach ($open_cases as $case)
                 <option value="{{ $case->caseID }}" {{ ($the_case->caseID ?? '') == $case->caseID ? 'selected' : '' }}>
                   {{ $case->name." 【".(string)$case->caseNoDisplay."】" }}
                 </option>
-            @endforeach
+              @endforeach
+            @else
+              <option value="">沒有可選個案</option>
+            @endif  
         </select>
       </div>
       <div class="col-1">
@@ -29,12 +33,12 @@
 <input type="hidden" id="selectedDate" value="{{ optional($result)->date ?? '' }}">
 <input type="hidden" id="print_url">
 <script>
-  $('#selectCase').select2({
-    placeholder: "請選擇或輸入個案名稱",
-    width: '100%' // 讓選單寬度適應
-  });
-
   document.addEventListener("DOMContentLoaded", function () {
+    $('#selectCase').select2({
+      placeholder: "請選擇或輸入個案名稱",
+      width: '100%' // 讓選單寬度適應
+    });
+
     let selectCase = document.getElementById("selectCase");
     let selectDate = document.getElementById("selectDate");
     let formID = document.getElementById("formID")?.value || '';  // 取得 formID
@@ -42,6 +46,7 @@
 
     // 頁面載入時如果已選個案 → 也載入日期清單
     if (selectCase.value && formID) {
+      // console.log('🔁 初始載入日期:', formID, selectCase.value);
       loadEvaluationDates(formID, selectCase.value, true); // ✅ 再次呼叫
     }
     // 當選擇個案時，載入該個案的所有評估日期
@@ -63,14 +68,20 @@
   });
 
   function loadEvaluationDates(formID, caseID, isInit = false) {
+    let selectDate = document.getElementById("selectDate");
     let selectedDate = document.getElementById("selectedDate").value;
+    // console.log(`▶ Fetching: /get-evaluation-dates/${formID}/${caseID}`);
 
     fetch(`/get-evaluation-dates/${formID}/${caseID}`)
     .then(response => {
-      if (!response.ok) throw new Error("Fetch failed");
-      return response.json();
+      const contentType = response.headers.get("content-type");
+      if (!response.ok || !contentType.includes("application/json")) {
+        throw new Error("伺服器錯誤，或回傳非 JSON");
+      }
+      return response.json(); 
     })
     .then(data => {
+      // console.log("✅ Fetch result:", data);
       if (data.no_records) {
         selectDate.innerHTML = '<option value="">沒有紀錄</option>';
         selectDate.disabled = true;
@@ -93,7 +104,10 @@
 
       selectDate.disabled = false;
     })
-    .catch(error => console.error('Error:', error));
+    .catch(error => {
+      console.error('❌ 資料載入失敗:', error);
+      // alert("資料載入失敗：" + error.message);
+    });
   }
 
 </script>
