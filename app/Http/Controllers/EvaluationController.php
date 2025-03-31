@@ -241,11 +241,6 @@ class EvaluationController extends Controller
         $formData
       );
 
-      // $preview = [
-      //   'delete' => [],
-      //   'update' => [],
-      //   'insert' => [],
-      // ];
       //共照團隊醫事人員，刪除、修改
       $deletedIds = array_filter(array_map('trim', explode(',', (string) $request->input('form01_deleted_ids', ''))));
       foreach ($deletedIds as $id) {
@@ -257,35 +252,14 @@ class EvaluationController extends Controller
       
       $infoNos = array_filter(array_map('trim', explode(',', $request->input('form01_infoNo', ''))));
       $oldNames = $request->input('form01_oldName', []);   
-      // $preview['update'][] = [
-      //   'all' => $request->all(),
-      //   'infoNos' => $infoNos,
-      //   'oldNames' => $oldNames,
-      // ];
       foreach ($infoNos as $i => $id) {
         if (!isset($oldNames[$id])) continue;
         $name = trim($oldNames[$id]);
         if ($name === '') {
           // 空姓名視為刪除
-          // $preview['delete'][] = "2. DELETE FROM hcevaluation01_medicals WHERE id = $id";
           $db->table('hcevaluation01_medicals')->where('id', $id)->delete();
           continue;
         }
-        // $data = [
-        //   'Name' => $request->form01_oldName[$id],
-        //   'CareDate' => $request->form01_oldCareDate[$id]?? '',
-        //   'IdNo' => $request->form01_oldIdNo[$id]?? '',
-        //   'JobTitle' => $request->form01_oldJobTitle[$id]?? '',
-        //   'JobTitleOther' => $request->form01_oldJobTitleOther[$id] ?? '',
-        //   'Tel' => $request->form01_oldTel[$id]?? '',
-        //   'CareRemark' => $request->form01_oldCareRemark[$id]?? '',
-        //   'updated_by' => session('user_id'),
-        //   'updated_at' => now()
-        // ];
-        // $preview['update'][] = [
-        //     'id' => $id,
-        //     'data' => $data,
-        // ];
         $db->table('hcevaluation01_medicals')->where('id', $id)->update([
           'Name' => $request->form01_oldName[$id],
           'CareDate' => $request->form01_oldCareDate[$id]?? '',
@@ -310,19 +284,6 @@ class EvaluationController extends Controller
 
       foreach ($names as $i => $name) {
         if (trim($name) === '') continue; // 跳過空白姓名
-        // $preview['insert'][] = [
-        //   'caseID'         => $caseID,
-        //   'date'           => $date,
-        //   'Name'           => $name,
-        //   'CareDate'       => $careDates[$i] ?? '0000-00-00',
-        //   'IdNo'           => $idNos[$i] ?? '',
-        //   'JobTitle'       => $jobTitles[$i] ?? '',
-        //   'JobTitleOther'  => $jobTitleOthers[$i] ?? '',
-        //   'Tel'            => $tels[$i] ?? '',
-        //   'CareRemark'     => $remarks[$i] ?? '',
-        //   'created_by'     => session('user_id'),
-        //   'created_at'     => now()
-        // ];
         $db->table('hcevaluation01_medicals')->insert([
           'caseID'         => $caseID,
           'date'           => $date,
@@ -337,7 +298,6 @@ class EvaluationController extends Controller
           'created_at'     => now()
         ]);
       }
-      // dd($preview); // 顯示所有模擬動作
     }
 
     return redirect()->back()->with('success', '資料已成功儲存');

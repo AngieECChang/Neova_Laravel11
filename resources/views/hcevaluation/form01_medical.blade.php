@@ -1,26 +1,4 @@
-@if(!empty(optional($medical_result)))
-  <table class="table table-bordered table-sm" style="font-size: 10pt;">
-    <thead class="table-light">
-      <tr>
-      { tagName: 'th', className:'table-info', style: 'width:110px;', innerHTML: '成員姓名' },
-          { tagName: 'th', className:'table-info', style: 'width:120px;', innerHTML: '加入照護團隊日期' },
-          { tagName: 'th', className:'table-info', style: 'width:125px;', innerHTML: '身分證字號' },
-          { tagName: 'th', className:'table-info', style: 'width:100px;', innerHTML: '職稱' },
-          { tagName: 'th', className:'table-info', style: 'width:110px;', innerHTML: '電話' },
-          { tagName: 'th', className:'table-info', style: 'width:120px;', innerHTML: '備註' },
-          { tagName: 'th', className:'table-info', style: 'width:60px;', innerHTML: '功能' }
-        <th width="80">成員姓名</th>
-        <th width="80">加入照護團隊日期</th>
-        <th width="80">身分證字號</th>
-        <th width="80">職稱</th>
-        <th width="80">電話</th>
-        <th>備註</th>
-        <th width="90">填寫人員</th>
-        <th class="printcol" width="40">功能</th>
-      </tr>
-    </thead>
-  </tbable>
-@endif
+
 
 <div id="form01_addShow">
   <div id="form01_Title"></div>

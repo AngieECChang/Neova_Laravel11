@@ -102,7 +102,7 @@
             <th class="table-success">生日</th>
             <td>
               <div class="d-flex align-items-center">
-                民國 <input type="text" class="form-control" name="birthdate" id="birthdate" value="{{ optional($the_case)->birthdate ? dateTo_c($the_case->birthdate) : '' }}" style="width: 150px;margin-left: 8px;">
+                民國 <input type="text" class="form-control" name="birthdate" id="birthdate" value="{{ optional($the_case)->birthdate && optional($the_case)->birthdate!='0000-00-00' ? dateTo_c($the_case->birthdate) : '' }}" style="width: 150px;margin-left: 8px;">
               </div>
               <input type="hidden" id="birthdate_AD" value="{{ optional($the_case)->birthdate }}">
             </td>
@@ -431,12 +431,12 @@
       </table>
       <input type="hidden" name="formID" value="hcevaluation01">
       <div>
+        @include('hcevaluation.form01_medical_saved')
+      </div>
+      <div>
         @include('hcevaluation.form01_medical')
       </div>
       <br>
-      <div>
-        <!-- @include('hcevaluation.form01_relative') -->
-      </div>
       @if(request()->segment(3)!="0")
         <div class="text-center mt-4">
           <button type="submit" class="btn btn-primary">儲存</button>
@@ -465,7 +465,7 @@
     return regex.test(id.toUpperCase());
   }
 
-  document.addEventListener("DOMContentLoaded", function() {
+  document.addEventListener("DOMContentLoaded", function() {   
     $('.datepicker').datepicker({
         format: 'yyyy-mm-dd',
         autoclose: true,
