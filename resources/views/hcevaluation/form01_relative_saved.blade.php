@@ -1,4 +1,4 @@
-@if(optional($relative_result)->isNotEmpty())
+@if(!empty((array)$relative_result) && optional($relative_result)->isNotEmpty())
   <table class="table table-bordered">
     <thead>
       <tr>
