@@ -44,7 +44,11 @@ Route::middleware(['auth.session'])->group(function () {
   Route::get('/personnel/{formID}/{employeeID}', [EmployeeListController::class, 'showForm']);
   Route::get('/nhiservice/registration', [NHIServiceController::class, 'registration_list'])->name('registration_list');
   Route::get('/nhiservice/treatment_maintain', [NHIServiceController::class, 'treatment_maintance'])->name('treatment_maintance');
-  Route::post('/newtreatment', [NHIServiceController::class, 'new_treatment'])->name('newtreatment');
+  Route::post('/newtreatment', [NHIServiceController::class, 'new_treatment'])->name('new_treatment');
+  Route::get('/nhiservice/treatment_set', [NHIServiceController::class, 'treatment_setting'])->name('treatment_set');
+  Route::get('/get_treatment/{id}', [NHIServiceController::class, 'get_treatment'])->name('get_treatment');
+  Route::put('/update_treatment/{id}', [NHIServiceController::class, 'update_treatment'])->name('update_treatment');
+  Route::post('/delete_treatment/{id}', [NHIServiceController::class, 'delete_treatment'])->name('delete_treatment');
 });
 
 
