@@ -14,24 +14,24 @@
       <!-- Sidebar - Brand -->
       <a class="sidebar-brand d-flex align-items-center justify-content-center" href="{{ route('hc-openlist') }}">
         <div class="sidebar-brand-icon rotate-n-15">
-            <i class="fas fa-laugh-wink"></i>
+            
         </div>
-        <div class="sidebar-brand-text mx-3" style="color:#ff9f43 !important;"> {{ session('client_name')}} {{ session('DB')}}</div>
+        <div class="sidebar-brand-text mx-3" style="color:#ff9f43 !important;font-size:14pt !important;font-weight: 600 !important;"><font color="white"><i class="fas fa-laugh-wink"></i></font> {{ session('client_name')}} {{ session('DB')}}</div>
       </a>
       <hr class="sidebar-divider my-0">
       <!-- Nav Item - Dashboard -->
       <li class="nav-item active">
-        <a href="#" class="sidebar-heading toggle-category nav-link" data-toggle="collapse" data-target="#categorylist" aria-expanded="false" aria-controls="categorylist" style="color:#faaacf;font-size:12pt !important;font-weight: 600 !important; text-decoration: none; padding-bottom:10px;"> 
-          <i class="fas fa-fw fa-users" style="font-size:11pt !important;color:#faaacf !important;"></i>
-          <span style="font-size:11pt !important;color:#faaacf !important;">個案列表</span>
+        <a href="#" class="sidebar-heading toggle-category nav-link" data-toggle="collapse" data-target="#categorylist" aria-expanded="false" aria-controls="categorylist"> 
+          <i class="fas fa-fw fa-users" style="font-size:14pt !important;color:#faaacf !important;"></i>
+          <span style="font-size:16pt !important;font-weight: 600 !important;color:#faaacf !important;">個案列表</span>
         </a>
         <div id="categorylist" class="collapse" style="line-height:10px !important; padding:0rem 0rem !important;" aria-labelledby="headingTwo" data-parent="#accordionSidebar">
         <div class="bg-white py-2 collapse-inner rounded">
           <!-- <a class="collapse-item d-inline-block" href="{{route('hc-openlist')}}" style="font-size:11pt !important;font-weight: 600 !important;color:#6f42c1 !important;"><i class="bi bi-person-plus"></i> &nbsp;<span style="font-size:11pt !important;font-weight: 600 !important;color:#6f42c1 !important;">預收案</span>
           </a> -->
-          <a class="collapse-item d-inline-block" href="{{route('hc-openlist')}}" style="font-size:11pt !important;font-weight: 600 !important;color:#6f42c1 !important;"><i class="bi bi-person-check"></i> &nbsp;<span style="font-size:11pt !important;font-weight: 600 !important;color:#6f42c1 !important;">收案</span>
+          <a class="collapse-item d-inline-block" href="{{route('hc-openlist')}}" style="font-size:11pt !important;font-weight: 600 !important;color:#6f42c1 !important;"><i class="bi bi-person-check"></i> &nbsp;<span style="font-size:12pt !important;font-weight: 600 !important;color:#6f42c1 !important;">收案</span>
           </a>
-          <a class="collapse-item d-inline-block" href="{{route('hc-closelist')}}" style="font-size:11pt !important;font-weight: 600 !important;color:#6f42c1 !important;"><i class="bi bi-person-x"></i> &nbsp;<span style="font-size:11pt !important;font-weight: 600 !important;color:#6f42c1 !important;">結案</span>
+          <a class="collapse-item d-inline-block" href="{{route('hc-closelist')}}" style="font-size:11pt !important;font-weight: 600 !important;color:#6f42c1 !important;"><i class="bi bi-person-x"></i> &nbsp;<span style="font-size:12pt !important;font-weight: 600 !important;color:#6f42c1 !important;">結案</span>
           </a>
         </div>
       </div>
@@ -39,32 +39,43 @@
       <div id="accordionCategories">
       @foreach ($allow_permission as $cateID => $permission)
         <hr class="sidebar-divider">
-        <a href="#" class="sidebar-heading toggle-category" data-toggle="collapse" data-target="#category{{$cateID}}" aria-expanded="false" aria-controls="category{{$cateID}}" style="color:#f6c23e;font-size:12pt !important;font-weight: 600 !important; text-decoration: none; padding-bottom:10px;">
-            {{ $permission->first()->cate_shortname }}
+        <a href="#" class="sidebar-heading toggle-category" data-toggle="collapse" data-target="#category{{$cateID}}" aria-expanded="false" aria-controls="category{{$cateID}}" style="color:#f6c23e;font-size:16pt !important;font-weight: 600 !important; text-decoration: none; padding-bottom:10px;">
+        <span style="font-size:16pt !important;font-weight: 600 !important;color:#f6c23e !important;">  {{ $permission->first()->cate_shortname }}</span>
         </a>
         <div id="category{{$cateID}}" class="collapse" data-parent="#accordionCategories">
           @php
             $subCategories = collect($permission)->groupBy('subcate_name');
           @endphp
           @foreach ($subCategories as $subcate_name => $items)
-            @php
-              $a_id = $items->first()->subcateID . '-' . $items->first()->itemID;
-            @endphp
-            <li class="nav-item">
-              <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapse{{$a_id}}" aria-expanded="false" aria-controls="collapse{{$a_id}}" style="font-size:11pt !important;font-weight: 600 !important;">
-                <i class="{{$items->first()->subcate_icon}}"></i>
-                <span style="font-size:11pt !important;font-weight: 600 !important;">{{$subcate_name}}</span>
-              </a>
-              <div id="collapse{{$a_id}}" class="collapse" aria-labelledby="headingTwo" data-parent="#accordionSidebar">
-                <div class="bg-white py-2 collapse-inner rounded">
-                  @foreach ($items as $item)
-                    <a class="collapse-item d-inline-block" href="{{ $item->link }}" style="font-size:10.5pt;">
-                      <i class="bi bi-plus-circle"></i> &nbsp;{{ $item->name }}
-                    </a>
-                  @endforeach
+            @if (empty($subcate_name))
+              @foreach ($items as $item)
+                <li class="nav-item">
+                  <a class="nav-link collapsed" href="{{ $item->link }}">
+                    <i class="{{ $item->subcate_icon }}" style="font-size:13pt !important;font-weight: 600 !important; padding-bottom:3px !important;padding-top:0px !important;"></i>
+                    <span style="font-size:13pt !important;font-weight: 600 !important; padding-bottom:3px !important;padding-top:0px !important;">{{ $item->name }}</span>
+                  </a>
+                </li>
+              @endforeach
+            @else
+              @php
+                $a_id = $items->first()->subcateID . '-' . $items->first()->itemID;
+              @endphp
+              <li class="nav-item">
+                <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapse{{$a_id}}" aria-expanded="false" aria-controls="collapse{{$a_id}}" style="font-size:13pt !important;font-weight: 600 !important;">
+                  <i class="{{$items->first()->subcate_icon}}" style="font-size:13pt !important;font-weight: 600 !important;"></i>
+                  <span style="font-size:13pt !important;font-weight: 600 !important; padding-bottom:3px !important;padding-top:0px !important;">{{$subcate_name}}</span>
+                </a>
+                <div id="collapse{{$a_id}}" class="collapse" aria-labelledby="headingTwo" data-parent="#accordionSidebar">
+                  <div class="bg-white py-2 collapse-inner rounded">
+                    @foreach ($items as $item)
+                      <a class="collapse-item d-inline-block" href="{{ $item->link }}">
+                        <i class="bi bi-plus-circle"></i> &nbsp;<span style="font-size:12pt !important;font-weight: 600 !important;">{{ $item->name }}</span>
+                      </a>
+                    @endforeach
+                  </div>
                 </div>
-              </div>
-            </li>
+              </li>
+            @endif
           @endforeach
         </div>
       @endforeach
