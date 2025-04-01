@@ -8,6 +8,7 @@ use App\Http\Controllers\HClistController;
 use App\Http\Controllers\CaseController;
 use App\Http\Controllers\EvaluationController;
 use App\Http\Controllers\EmployeeListController;
+use App\Http\Controllers\NHIServiceController;
 
 // Route::get('/', function () { return view('welcome'); });
 Route::get('/',  [LoginController::class, 'showLoginForm'])->name('login');
@@ -35,17 +36,15 @@ Route::middleware(['auth.session'])->group(function () {
   Route::post('/close-case/{id}', [CaseController::class, 'case_close'])->name('hc-case_close');
   Route::post('/reopen-case/{id}', [CaseController::class, 'reopen_case']);
   Route::post('/delete-close/{id}', [CaseController::class, 'delete_close'])->name('hc-delete_close');
-  // 顯示表單
   Route::get('/get-evaluation-dates/{formID}/{caseID}', [EvaluationController::class, 'getEvaluationDates']);
-  // Route::middleware(['loadEmployeesByIdNo'])->group(function () {
-    Route::get('/hcevaluation/{formID}/{caseID}/{date?}', [EvaluationController::class, 'showEvaluationForm'])->name('hcevaluation.edit');  //{date?} → date 是可選的，如果沒有日期，就顯示「無紀錄的表單」
-    Route::get('/print/hcevaluation/{formID}/{caseID}/{date?}', [EvaluationController::class, 'print'])->name('hcevaluation.print');
-  // });
+  Route::get('/hcevaluation/{formID}/{caseID}/{date?}', [EvaluationController::class, 'showEvaluationForm'])->name('hcevaluation.edit');  //{date?} → date 是可選的，如果沒有日期，就顯示「無紀錄的表單」
+  Route::get('/print/hcevaluation/{formID}/{caseID}/{date?}', [EvaluationController::class, 'print'])->name('hcevaluation.print');
   Route::post('/hcevaluation/save', [EvaluationController::class, 'save'])->name('hcevaluation.save');
-  // Route::get('/hcevaluation/{formID}/{caseID}', [EvaluationController::class, 'show'])->name('hcevaluation.{formID}');
   Route::get('/personnel/employeelist', [EmployeeListController::class, 'showlist']);
   Route::get('/personnel/{formID}/{employeeID}', [EmployeeListController::class, 'showForm']);
-
+  Route::get('/nhiservice/registration', [NHIServiceController::class, 'registration_list'])->name('registration_list');
+  Route::get('/nhiservice/treatment_maintain', [NHIServiceController::class, 'treatment_maintance'])->name('treatment_maintance');
+  Route::post('/newtreatment', [NHIServiceController::class, 'new_treatment'])->name('newtreatment');
 });
 
 
