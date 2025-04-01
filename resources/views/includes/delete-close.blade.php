@@ -27,8 +27,8 @@
             </div>
           </div>
           <div class="d-flex gap-2 mt-5">
-            <button type="submit" class="btn btn-success w-50">確認刪除結案紀錄</button>
             <button type="button" class="btn btn-secondary w-50" data-bs-dismiss="modal">取消</button>
+            <button type="submit" class="btn btn-success w-50">確認刪除結案紀錄</button>
           </div>
         </form>
       </div>
