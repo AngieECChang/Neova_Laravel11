@@ -21,6 +21,11 @@
   <!-- <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.10.0/css/bootstrap-datepicker.min.css" rel="stylesheet"> -->
 
   <style>
+    .radio {
+      width: 20px !important;
+      height: 20px !important;
+      vertical-align: middle; /* 保持與文字垂直對齊 */
+    }
     @media print {
       @page {
         size: A4 portrait;
