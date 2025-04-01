@@ -97,7 +97,7 @@ var myLineChart = new Chart(ctx, {
       backgroundColor: "rgb(255,255,255)",
       bodyFontColor: "#858796",
       titleMarginBottom: 10,
-      titleFontColor: '#6e707e',
+      titleFontColor: '#3C3C3C',
       titleFontSize: 14,
       borderColor: '#dddfeb',
       borderWidth: 1,

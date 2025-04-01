@@ -90,7 +90,7 @@ var myBarChart = new Chart(ctx, {
     },
     tooltips: {
       titleMarginBottom: 10,
-      titleFontColor: '#6e707e',
+      titleFontColor: '#3C3C3C',
       titleFontSize: 14,
       backgroundColor: "rgb(255,255,255)",
       bodyFontColor: "#858796",
