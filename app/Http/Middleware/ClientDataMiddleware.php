@@ -33,8 +33,21 @@ class ClientDataMiddleware
     // }
     $area_arrayinfo = $area->pluck('areaName', 'areaID')->toArray();
 
+    $treatment_lists = $db->table('nhiservice_treatment')
+    ->orderBy('category')
+    ->orderBy('short_code')
+    ->get();
+    //用id當作鍵值，先將每一筆轉成陣列，避免出現Cannot use object of type stdClass as array錯誤
+    $treatment_item_arrayinfo = $treatment_lists
+      ->map(function ($item) {
+          return (array) $item;
+      })
+      ->keyBy('id')
+      ->toArray();
+
     // 共享數據到所有視圖
     View::share('area_arrayinfo', $area_arrayinfo);
+    View::share('treatment_item_arrayinfo', $treatment_item_arrayinfo);
     return $next($request);
   }
 }
