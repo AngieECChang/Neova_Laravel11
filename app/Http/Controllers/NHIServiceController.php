@@ -194,14 +194,126 @@ class NHIServiceController extends Controller
     $databaseName = session('DB'); // 可根據條件動態變更
     $db = DatabaseConnectionService::setConnection($databaseName);
 
-    $treatment_lists = $db->table('nhiservice_treatment')
-      ->orderBy('category')
-      ->orderBy('short_code');
-      // 分類 caseType -> areaName
-    $treatment_list = $treatment_lists->get()->groupBy(['category']);
+    $treatment_set_lists = $db->table('nhiservice_treatment_set as a')
+      ->leftjoin('nhiservice_treatment as b', 'a.nhiservice_treatment_id', '=', 'b.id')
+      ->select(
+        'a.*',
+        'b.treatment_code',
+        'b.treatment_name_zh',
+      )
+      ->orderBy('set_id')
+      ->orderBy('sort');
 
-    // dd($treatment_list->toArray());
+    $treatment_set_list = $treatment_set_lists->get()->groupBy(['set_id']);
+    return view('nhiservice.treatment_set', compact('treatment_set_list'));
+  }
 
-    return view('nhiservice.treatment_maintain', compact('treatment_list'));
+  public function treatment_set_edit(Request $request, $set_id = null)
+  {
+    $databaseName = session('DB'); // 可根據條件動態變更
+    $db = DatabaseConnectionService::setConnection($databaseName);
+
+    if($set_id!=""){
+      $result = $db->table('nhiservice_treatment_set')
+      ->where('set_id', $set_id)
+      ->orderBy('sort')
+      ->get();
+
+      $treatment_set_lists = $db->table('nhiservice_treatment_set as a')
+      ->leftjoin('nhiservice_treatment as b', 'a.nhiservice_treatment_id', '=', 'b.id')
+      ->select(
+        'a.*',
+        'b.treatment_code',
+        'b.treatment_name_zh',
+        'b.short_code'
+      )
+      ->where('set_id', $set_id)
+      ->orderBy('sort')
+      ->get();
+
+    }else{
+      $result = [(object)array_fill_keys(\Schema::getColumnListing('nhiservice_treatment_set'), null)];
+      $treatment_set_lists = collect(); // 回傳空的 Laravel Collection
+    }
+
+    $treatment_items = $db->table('nhiservice_treatment')
+    ->where('category','!=', '99')
+    ->orderBy('short_code')
+    ->get();
+
+    return view('nhiservice.treatment_set_page', compact('result', 'treatment_items','treatment_set_lists'));
+  }
+
+  public function save_treatment_set(Request $request)
+  {
+    $databaseName = session('DB'); // 可根據條件動態變更
+    $db = DatabaseConnectionService::setConnection($databaseName);
+
+    $new_set_id = ($db->table('nhiservice_treatment_set')->max('set_id') ?? 0) + 1;
+    // dd($request);
+    
+    $set_id = $request->input('set_id');
+    $description = $request->input('description');
+
+    $write_set_id = ($set_id!="" && $set_id!="0"?$set_id:$new_set_id);
+
+    $deletedIds = array_filter(array_map('trim', explode(',', (string) $request->input('oldtreatment_deleted_ids', ''))));
+    foreach ($deletedIds as $id) {
+      if (!empty($id)) {
+        $db->table('nhiservice_treatment_set')->where('id', $id)->delete();
+      }
+    }
+    $infoNos = array_filter(array_map('trim', explode(',', $request->input('oldtreatment_infoNo', ''))));
+    $oldtreatment_id = $request->input('oldtreatment_id', []);    
+    foreach ($infoNos as $i => $id) {
+      if (!isset($oldtreatment_id[$id])) continue;
+      $short_code = trim($request->oldtreatment_code[$id]);
+      if ($short_code === '') {
+        $db->table('nhiservice_treatment_set')->where('id', $id)->delete();
+        continue;
+      }
+      $db->table('nhiservice_treatment_set')->where('id', $id)->update([
+        'description' => $description,
+        'nhiservice_treatment_id' => $request->oldtreatment_id[$id]?? '',
+        'sort' => $request->oldtreatment_sort[$id]?? '',
+        'updated_by' => session('user_id'),
+        'updated_at' => now()
+      ]);
+    }
+
+    //處置套組項目，新增
+    $short_code = $request->input('treatment_item', []);
+    $treatment_code = $request->input('treatment_code', []);
+    $treatment_name = $request->input('treatment_name', []);
+    $treatment_sort = $request->input('treatment_sort', []);
+    $treatment_id = $request->input('treatment_id', []);
+    foreach ($short_code as $i => $code) {
+      if (trim($code) === '') continue; // 跳過空白
+      $db->table('nhiservice_treatment_set')->insert([
+        'set_id'         => $write_set_id,
+        'description'    => $description ?? '',
+        'nhiservice_treatment_id' => $treatment_id[$i] ?? '',
+        'sort'       => $treatment_sort[$i] ?? '',
+        'created_by'     => session('user_id'),
+        'created_at'     => now()
+      ]);
+    }
+    return redirect()->route('treatment_set')->with('success', '處置套組儲存成功！');
+  }
+
+  public function delete_treatment_set(Request $request, $set_id)
+  {
+    $databaseName = session('DB'); // 可根據條件動態變更
+    $db = DatabaseConnectionService::setConnection($databaseName);
+      
+    $affected = $db->table('nhiservice_treatment_set')
+    ->where('set_id', $set_id)
+    ->delete();
+
+    if ($affected) {
+      return response()->json(['success' => true, 'message' => '刪除成功']);
+    } else {
+      return response()->json(['success' => false, 'errors' => '刪除失敗']);
+    }
   }
 }
