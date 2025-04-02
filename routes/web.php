@@ -42,13 +42,16 @@ Route::middleware(['auth.session'])->group(function () {
   Route::post('/hcevaluation/save', [EvaluationController::class, 'save'])->name('hcevaluation.save');
   Route::get('/personnel/employeelist', [EmployeeListController::class, 'showlist']);
   Route::get('/personnel/{formID}/{employeeID}', [EmployeeListController::class, 'showForm']);
-  Route::get('/nhiservice/registration', [NHIServiceController::class, 'registration_list'])->name('registration_list');
-  Route::get('/nhiservice/treatment_maintain', [NHIServiceController::class, 'treatment_maintance'])->name('treatment_maintance');
+  Route::get('/nhiservice/registration', [NHIServiceController::class, 'registration_list'])->name('registration_list'); //健保掛號列表
+  Route::get('/nhiservice/treatment_maintain', [NHIServiceController::class, 'treatment_maintance'])->name('treatment_maintance'); //健保處置代碼列表
   Route::post('/newtreatment', [NHIServiceController::class, 'new_treatment'])->name('new_treatment');
-  Route::get('/nhiservice/treatment_set', [NHIServiceController::class, 'treatment_setting'])->name('treatment_set');
   Route::get('/get_treatment/{id}', [NHIServiceController::class, 'get_treatment'])->name('get_treatment');
   Route::put('/update_treatment/{id}', [NHIServiceController::class, 'update_treatment'])->name('update_treatment');
   Route::post('/delete_treatment/{id}', [NHIServiceController::class, 'delete_treatment'])->name('delete_treatment');
+  Route::get('/nhiservice/treatment_set', [NHIServiceController::class, 'treatment_setting'])->name('treatment_set'); //健保處置套組列表
+  Route::get('/nhiservice/treatment_set_page/{set_id?}', [NHIServiceController::class, 'treatment_set_edit'])->name('nhiservice.treatment_set_edit');
+  Route::post('/nhiservice/treatment_set_page/save', [NHIServiceController::class, 'save_treatment_set'])->name('treatment_set_save');
+  Route::post('/delete_treatment_set/{set_id}', [NHIServiceController::class, 'delete_treatment_set'])->name('delete_treatment_set');
 });
 
 
