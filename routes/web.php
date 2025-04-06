@@ -38,6 +38,7 @@ Route::middleware(['auth.session'])->group(function () {
   Route::post('/delete-close/{id}', [CaseController::class, 'delete_close'])->name('hc-delete_close');
   Route::get('/get-evaluation-dates/{formID}/{caseID}', [EvaluationController::class, 'getEvaluationDates']);
   Route::get('/hcevaluation/{formID}/{caseID}/{date?}', [EvaluationController::class, 'showEvaluationForm'])->name('hcevaluation.edit');  //{date?} → date 是可選的，如果沒有日期，就顯示「無紀錄的表單」
+  Route::get('/icd/lookup', [\App\Http\Controllers\ICDController::class, 'lookup'])->name('icd.lookup');
   Route::get('/print/hcevaluation/{formID}/{caseID}/{date?}', [EvaluationController::class, 'print'])->name('hcevaluation.print');
   Route::post('/hcevaluation/save', [EvaluationController::class, 'save'])->name('hcevaluation.save');
   Route::get('/personnel/employeelist', [EmployeeListController::class, 'showlist']);

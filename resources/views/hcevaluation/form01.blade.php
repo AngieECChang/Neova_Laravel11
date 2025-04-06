@@ -45,7 +45,7 @@
 </style>
 <div class="row align-items-center mt-4">
   <div class="col-6">
-    <h1 class="h3 text-gray-800 mb-2">全人周全性評估_基本資料</h1>
+    <h1 class="h3 text-gray-800 mb-2">基本資料</h1>
   </div>
   <div class="col-6">
     <form method="GET" class="d-flex align-items-center justify-content-end" id="regionForm">
@@ -169,6 +169,24 @@
             </td>
           </tr>
           <tr>
+            <th class="table-success">診斷碼</th>
+            <td colspan="6">
+              <div class="row g-2">
+                @for ($i = 1; $i <= 6; $i++)
+                  <div class="col-md-6">
+                    <div class="input-group">
+                      <input type="text" name="diag_{{ $i }}_ICD10" id="diag_{{ $i }}_ICD10" class="form-control icd-autocomplete mt-2" placeholder="診斷ICD10" data-index="{{ $i }}" autocomplete="off" value="{{ optional($result)->{'diag_'.$i.'_ICD10'} ?? '' }}" style="max-width: 120px;">
+                      <input type="text" id="diag_{{ $i }}_ICD10name" name="diag_{{ $i }}_ICD10name" class="form-control mt-2" placeholder="診斷名稱" value="{{ optional($result)->{'diag_'.$i.'_ICD10name'} ?? '' }}">
+                      <button type="button" class="btn btn-outline-secondary mt-2" onclick="clearDiag({{ $i }})">清除</button>
+                    </div>
+                  </div>
+                  <div class="col-md-6">
+                  </div>
+                @endfor
+              </div>
+            </td>
+          </tr>
+          <tr>
             <th class="table-success">教育程度</th>
             <td colspan="6">
               <div class="form-check form-check-inline">
@@ -284,6 +302,25 @@
                   @endforeach
                 </div>
               @endforeach
+            </td>
+          </tr>
+          <tr>
+            <th class="table-success">重大傷病</th>
+            <td colspan="6">
+              <div class="row g-2">
+                @for ($i = 1; $i <= 6; $i++)
+                  <div class="col-md-6">
+                    <div class="input-group">
+                      <input type="text" name="catastrophic_code_{{ $i }}" id="catastrophic_code	_{{ $i }}" class="form-control mt-2" placeholder="重大傷病代碼" data-index="{{ $i }}" autocomplete="off" value="{{ optional($result)->{'catastrophic_code_'.$i} ?? '' }}" style="max-width: 120px;">
+                      <input type="text" name="catastrophic_name_{{ $i }}" id="catastrophic_name	_{{ $i }}" class="form-control mt-2" placeholder="重大傷病名稱" autocomplete="off" value="{{ optional($result)->{'catastrophic_name_'.$i} ?? '' }}" style="max-width:200px;">
+                      <input type="text" name="catastrophic_startdate_{{ $i }}" id="catastrophic_startdate_{{ $i }}" class="form-control mt-2" placeholder="起始日期" autocomplete="off" value="{{ optional($result)->{'catastrophic_startdate_'.$i} ?? '' }}" style="max-width: 120px;">
+                      <input type="text" name="catastrophic_enddate_{{ $i }}" id="catastrophic_enddate_{{ $i }}" class="form-control mt-2" placeholder="結束日期" autocomplete="off" value="{{ optional($result)->{'catastrophic_enddate_'.$i} ?? '' }}" style="max-width: 120px;">
+                    </div>
+                  </div>
+                  <div class="col-md-6">
+                  </div>
+                @endfor
+              </div>
             </td>
           </tr>
           <tr>
@@ -529,6 +566,32 @@
       dayNamesMin: ["日", "一", "二", "三", "四", "五", "六"], // 國字星期
     });
 
+    $("input[id^=catastrophic_startdate_]").datepicker({
+      dateFormat: "yy-mm-dd",
+      changeMonth: true,
+      changeYear: true,
+      defaultDate: new Date(),
+      // showButtonPanel: true,
+      monthNames: ["一月", "二月", "三月", "四月", "五月", "六月",
+                  "七月", "八月", "九月", "十月", "十一月", "十二月"], // 國字月份
+      monthNamesShort: ["1月", "2月", "3月", "4月", "5月", "6月",
+                        "7月", "8月", "9月", "10月", "11月", "12月"],
+      dayNamesMin: ["日", "一", "二", "三", "四", "五", "六"], // 國字星期
+    });
+
+    $("input[id^=catastrophic_enddate_]").datepicker({
+      dateFormat: "yy-mm-dd",
+      changeMonth: true,
+      changeYear: true,
+      defaultDate: new Date(),
+      // showButtonPanel: true,
+      monthNames: ["一月", "二月", "三月", "四月", "五月", "六月",
+                  "七月", "八月", "九月", "十月", "十一月", "十二月"], // 國字月份
+      monthNamesShort: ["1月", "2月", "3月", "4月", "5月", "6月",
+                        "7月", "8月", "9月", "10月", "11月", "12月"],
+      dayNamesMin: ["日", "一", "二", "三", "四", "五", "六"], // 國字星期
+    });
+
     $('#city').on('change', function () {
       let city = $(this).val();
       $('#town').html('<option value="">載入中...</option>');
@@ -564,6 +627,41 @@
       let dataId = selectedOption.data('id');
       $('#NurseID').val(dataId);
     });
+
+    $('.icd-autocomplete').each(function () {
+      let $input = $(this);
+      let index = $input.data('index');
+
+      $input.autocomplete({
+        source: function (request, response) {
+          $.ajax({
+            url: '{{ route("icd.lookup") }}',
+            dataType: 'json',
+            data: { q: request.term },
+            success: function (data) {
+              response($.map(data, function (item) {
+                return {
+                  label: item.icd10_new + ' - ' + item.icd10_cname,
+                  value: item.icd10_new,
+                  icd_name: item.icd10_cname
+                };
+              }));
+            }
+          });
+        },
+        minLength: 3,
+        delay: 300,
+        select: function (event, ui) {
+          // $(`#diag_${index}_ICD10`).val(ui.item.icd10);
+          $(`#diag_${index}_ICD10name`).val(ui.item.icd_name);
+        }
+      });
+    });
   });
+
+  function clearDiag(index) {
+    $('#diag_${index}_ICD10').val(null).trigger('change');
+    $('#diag_${index}_ICD10name').val('');
+  }
 </script>
 @endsection
