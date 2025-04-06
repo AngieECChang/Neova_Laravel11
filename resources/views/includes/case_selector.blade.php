@@ -72,7 +72,7 @@
     let selectedDate = document.getElementById("selectedDate").value;
     // console.log(`▶ Fetching: /get-evaluation-dates/${formID}/${caseID}`);
 
-    fetch(`/get-evaluation-dates/${formID}/${caseID}`)
+    fetch(`${window.location.origin}/get-evaluation-dates/${formID}/${caseID}`)
     .then(response => {
       const contentType = response.headers.get("content-type");
       if (!response.ok || !contentType.includes("application/json")) {
@@ -106,7 +106,7 @@
     })
     .catch(error => {
       console.error('❌ 資料載入失敗:', error);
-      // alert("資料載入失敗：" + error.message);
+      console.log("資料載入失敗：" + error.message);
     });
   }
 
