@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Session;
 use App\Http\Controllers\LoginController;
-use App\Http\Controllers\HClistController;
+use App\Http\Controllers\HCListController;
 use App\Http\Controllers\CaseController;
 use App\Http\Controllers\EvaluationController;
 use App\Http\Controllers\EmployeeListController;
@@ -26,6 +26,7 @@ Route::middleware(['auth.session'])->group(function () {
   Route::get('/dashboard', function () {
       return view('dashboard');
   })->name('dashboard');
+  Route::get('/layouts/{subcateID}', [\App\Http\Controllers\FormController::class, 'show_list'])->name('layouts.formoptions');
   Route::get('/hc-openlist', [HCListController::class, 'HC_Openlist'])->name('hc-openlist');
   Route::get('/hc-create', [HCListController::class, 'HC_Create'])->name('hc-create');
   Route::get('/hc-closelist', [HCListController::class, 'HC_Closelist'])->name('hc-closelist');
@@ -44,6 +45,8 @@ Route::middleware(['auth.session'])->group(function () {
   Route::get('/personnel/employeelist', [EmployeeListController::class, 'showlist']);
   Route::get('/personnel/{formID}/{employeeID}', [EmployeeListController::class, 'showForm']);
   Route::get('/nhiservice/registration', [NHIServiceController::class, 'registration_list'])->name('registration_list'); //健保掛號列表
+  Route::get('/nhiservice/reginfo/{REGID?}', [NHIServiceController::class, 'reginfo'])->name('reginfo'); //健保掛號
+
   Route::get('/nhiservice/treatment_maintain', [NHIServiceController::class, 'treatment_maintance'])->name('treatment_maintance'); //健保處置代碼列表
   Route::post('/newtreatment', [NHIServiceController::class, 'new_treatment'])->name('new_treatment');
   Route::get('/get_treatment/{id}', [NHIServiceController::class, 'get_treatment'])->name('get_treatment');

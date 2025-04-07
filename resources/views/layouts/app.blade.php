@@ -61,19 +61,10 @@
                 $a_id = $items->first()->subcateID . '-' . $items->first()->itemID;
               @endphp
               <li class="nav-item">
-                <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapse{{$a_id}}" aria-expanded="false" aria-controls="collapse{{$a_id}}" style="font-size:13pt !important;font-weight: 600 !important;">
-                  <i class="{{$items->first()->subcate_icon}}" style="font-size:13pt !important;font-weight: 600 !important;"></i>
-                  <span style="font-size:13pt !important;font-weight: 600 !important; padding-bottom:3px !important;padding-top:0px !important;">{{$subcate_name}}</span>
+                <a class="nav-link" href="{{ route('layouts.formoptions', ['subcateID' => $items->first()->subcateID]) }}">
+                  <i class="{{$items->first()->subcate_icon}}" style="font-size:13pt !important;font-weight: 600 !important;"></i> &nbsp;<span style="font-size:13pt !important;font-weight: 600 !important; padding-bottom:3px !important;padding-top:0px !important;">{{ $subcate_name }}</span>
                 </a>
-                <div id="collapse{{$a_id}}" class="collapse" aria-labelledby="headingTwo" data-parent="#accordionSidebar">
-                  <div class="bg-white py-2 collapse-inner rounded">
-                    @foreach ($items as $item)
-                      <a class="collapse-item d-inline-block" href="{{ $item->link }}">
-                        <i class="bi bi-plus-circle"></i> &nbsp;<span style="font-size:12pt !important;font-weight: 600 !important;">{{ $item->name }}</span>
-                      </a>
-                    @endforeach
-                  </div>
-                </div>
+               
               </li>
             @endif
           @endforeach
