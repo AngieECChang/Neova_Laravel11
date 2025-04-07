@@ -76,6 +76,7 @@
             </thead>
             <tbody>
               @foreach ($used as $treatmentType => $treatment)
+              
               <tr>
                 <td class="text-center">{{ $treatment_category[$treatment_tab2[$treatment->category]] }}</td>
                 <td class="text-center">{{ $treatment->short_code }}</td>
@@ -129,10 +130,10 @@
                   <td>{{ $item->treatment_name_zh }}</td>
                   <td class="text-center">{{ $item->points }}</td>
                   <td>
-                    <button class="btn btn-sm btn-success edit-type-btn" style="font-size: 1rem !important;" data-id="{{ $treatment->id }}" data-bs-toggle="modal" data-bs-target="#edittreatmentModal">
+                    <button class="btn btn-sm btn-success edit-type-btn" style="font-size: 1rem !important;" data-id="{{ $item->id }}" data-bs-toggle="modal" data-bs-target="#edittreatmentModal">
                       <i class="bi bi-pencil-square"></i>&nbsp;編輯
                     </button>
-                    <button class="btn btn-sm close-btn" style="background-color:#e83e8c;color: #ffffff;font-size: 1rem !important;" data-id="{{ $treatment->id }}" data-treatment_code="{{ $treatment->treatment_code }}" data-short_code="{{ $treatment->short_code }}" data-name="{{ $treatment->treatment_name_zh }}" data-bs-toggle="modal" data-bs-target="#deleteModal">
+                    <button class="btn btn-sm close-btn" style="background-color:#e83e8c;color: #ffffff;font-size: 1rem !important;" data-id="{{ $item->id }}" data-treatment_code="{{ $item->treatment_code }}" data-short_code="{{ $item->short_code }}" data-name="{{ $item->treatment_name_zh }}" data-bs-toggle="modal" data-bs-target="#deleteModal">
                       <i class="bi bi-trash"></i>&nbsp;刪除
                     </button>
                   </td>
