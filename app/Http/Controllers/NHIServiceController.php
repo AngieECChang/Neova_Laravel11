@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Schema;
 use App\Services\DatabaseConnectionService;
 
 class NHIServiceController extends Controller
@@ -52,28 +53,24 @@ class NHIServiceController extends Controller
   {
     $databaseName = session('DB'); // 可根據條件動態變更
     $db = DatabaseConnectionService::setConnection($databaseName);
+    
+    if($REGID!=""){
+      $result = $db->table('nhiservice01 as a')
+        ->leftJoin('nhiservice02 as b', 'a.REGID', '=', 'b.REGID')
+        ->where('a.REGID', $REGID)
+        ->first();
+    } else {
+      $columns1 = Schema::getColumnListing('nhiservice01');
+      $columns2 = Schema::getColumnListing('nhiservice02');
 
-    $start_date = $request->input('startdate')??date("Y-m-01");
-    $end_date = $request->input('enddate')?? date("Y-m-t");
+      $allColumns = array_unique(array_merge($columns1, $columns2));
 
-    $start_datetime = $start_date . ' 00:00:00';
-    $end_datetime = $end_date . ' 23:59:59';
-
-    $registration_list = $db->table('nhiservice01 as a')
-      ->leftJoin('nhiservice02 as b', 'a.REGID', '=', 'b.REGID')
-      ->leftJoin('cases as c', 'a.caseID', '=', 'c.caseID')
-      ->select(
-          'a.*',
-          'b.*',
-          'c.name',
-        )
-      ->whereBetween('a.A17', [$start_datetime, $end_datetime])
-      ->groupBy(['a.REGID'])
-      ->orderBy('a.A17')
-      ->get();
+      $resultArray = array_fill_keys($allColumns, '');
+      $result = (object) $resultArray;
+    }
 
     // dd($registration_list);
-    return view('nhiservice.reginfo', compact('registration_list'));
+    return view('nhiservice.reginfo', compact('result'));
   }
 
   public function getCaseReginfo(Request $request)
