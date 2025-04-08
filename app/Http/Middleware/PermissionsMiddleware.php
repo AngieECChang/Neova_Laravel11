@@ -43,11 +43,20 @@ class PermissionsMiddleware
 
       $users_arrayinfo = $users->pluck('name', 'user_id')->toArray();
 
+      $clientinfo = DB::table('client_info')
+      ->where('client_id', session('client_id'))
+      ->first();
+      $clientinfo_arrayinfo = [];
+
+      if ($clientinfo) {
+          $clientinfo_arrayinfo[$clientinfo->client_id] = (array) $clientinfo;
+      }
       // 共享數據到所有視圖
       // View::share(['allow_permission', $permissions, 'cities', $cities]);
       View::share('allow_permission', $permissions);
       View::share('cities', $cities);
       View::share('users_arrayinfo', $users_arrayinfo);
+      View::share('clientinfo_arrayinfo', $clientinfo_arrayinfo);
       // dd($permissions->toArray()); // 測試 Middleware 是否正常運作
     }
 
