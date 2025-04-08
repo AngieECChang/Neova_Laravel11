@@ -12,10 +12,150 @@ class NHIServiceController extends Controller
 {
   public function registration_list(Request $request)
   {
+    $request->validate([
+      'startdate' => 'nullable|date|before_or_equal:enddate',
+      'enddate'   => 'nullable|date|after_or_equal:startdate',
+    ], [
+      'startdate.before_or_equal' => '起始日期不能晚於結束日期',
+      'enddate.after_or_equal'    => '結束日期不能早於起始日期',
+      'startdate.date'            => '起始日期格式錯誤',
+      'enddate.date'              => '結束日期格式錯誤',
+    ]);
+
     $databaseName = session('DB'); // 可根據條件動態變更
     $db = DatabaseConnectionService::setConnection($databaseName);
 
-    return view('nhiservice.registration');
+    $start_date = $request->input('startdate')??date("Y-m-01");
+    $end_date = $request->input('enddate')?? date("Y-m-t");
+
+    $start_datetime = $start_date . ' 00:00:00';
+    $end_datetime = $end_date . ' 23:59:59';
+
+    $registration_list = $db->table('nhiservice01 as a')
+      ->leftJoin('nhiservice02 as b', 'a.REGID', '=', 'b.REGID')
+      ->leftJoin('cases as c', 'a.caseID', '=', 'c.caseID')
+      ->select(
+          'a.*',
+          'b.*',
+          'c.name',
+        )
+      ->whereBetween('a.A17', [$start_datetime, $end_datetime])
+      ->groupBy(['a.REGID'])
+      ->orderBy('a.A17')
+      ->get();
+
+    // dd($registration_list);
+    return view('nhiservice.registration', compact('registration_list'));
+  }
+
+  public function reginfo(Request $request, $REGID=null)
+  {
+    $databaseName = session('DB'); // 可根據條件動態變更
+    $db = DatabaseConnectionService::setConnection($databaseName);
+
+    $start_date = $request->input('startdate')??date("Y-m-01");
+    $end_date = $request->input('enddate')?? date("Y-m-t");
+
+    $start_datetime = $start_date . ' 00:00:00';
+    $end_datetime = $end_date . ' 23:59:59';
+
+    $registration_list = $db->table('nhiservice01 as a')
+      ->leftJoin('nhiservice02 as b', 'a.REGID', '=', 'b.REGID')
+      ->leftJoin('cases as c', 'a.caseID', '=', 'c.caseID')
+      ->select(
+          'a.*',
+          'b.*',
+          'c.name',
+        )
+      ->whereBetween('a.A17', [$start_datetime, $end_datetime])
+      ->groupBy(['a.REGID'])
+      ->orderBy('a.A17')
+      ->get();
+
+    // dd($registration_list);
+    return view('nhiservice.reginfo', compact('registration_list'));
+  }
+
+  public function getCaseReginfo(Request $request)
+  {
+    $caseID = strtoupper($request->input('caseID'));
+
+    $databaseName = session('DB'); // 可根據條件動態變更
+    $db = DatabaseConnectionService::setConnection($databaseName);
+
+    try {
+      $lastRecord = $db->table('nhiservice01')
+      ->where('caseID',$caseID)
+      ->where('finished','1')
+      ->orderByDesc('A17')
+      ->first();
+
+      $case_data = $db->table('cases')
+      ->where('caseID',$caseID)
+      ->first();
+
+      $case_type = $case_data->case_type;
+      $nhiArray = config('public.nhi_array');
+      $d4 = $nhiArray[$case_type]['d4'] ?? null;
+
+      if ($lastRecord) {
+        return response()->json(['last_date' => $lastRecord->A17." (".$lastRecord->A23.")", 'last_D8'=> $lastRecord->D8, 'this_D4'=> $d4]);
+      } else {
+         return response()->json(['last_date' => null, 'last_D8'=> null, 'this_D4'=>null]);
+      }
+    } catch (\Exception $e) {
+      // 如果真的錯了，把錯誤丟回去看訊息
+      return response()->json(['success' => false,'message' => '伺服器錯誤：' . $e->getMessage()], 500);
+    }
+  }
+
+  public function save_reginfo(Request $request)
+  {
+    $databaseName = session('DB'); // 可根據條件動態變更
+    $db = DatabaseConnectionService::setConnection($databaseName);
+
+    $caseID = $request->input('firmID'); //個案
+    $shift = $request->input('shift'); //申報補件
+    $A17 = $request->input('A17'); //就診日期
+    $A12 = $request->input('A12'); //	身分證號
+    $A13 = $request->input('A13'); //出生日期
+    $A23 = $request->input('A23'); //就診類別
+    $D1 = $request->input('D1'); //案件分類
+    $D4 = $request->input('D4'); //特療項目1
+    $D8 = $request->input('D8'); //就醫科別
+    $night_plus = $request->input('night_plus'); //夜間加成
+    $hospID = $request->input('HospID');
+    $case_type = $request->input('type');
+
+    $data = [
+      'A00' => '1',
+      'A01' => '2',  //異常上傳(無卡掛號)
+      'A02' => '1.0',
+      't5' => '1',
+      'A99' => '1',
+      'finished' => '0',
+      'status' => '1',
+      'caseID' => $caseID,
+      'case_type' => $case_type,
+      'night_plus' => $night_plus,
+      'A11' => '',
+      'A12' => $A17,
+      'A13' => $A13,
+      'A14' => $hospID,
+      'A17' => $A17,
+      'A18' => '',
+      'A19' => '',
+      'A23' => $A23,
+      'shift' => $shift,
+      'D1' => $D1,
+      'D4' => $D4,
+      'D8' => $D8,
+      'created_by' => session('user_id'),
+    ];
+
+    $insert = $db->table('nhiservice01')->insert($data);
+
+    return redirect()->back()->with('success', '資料已成功儲存');
   }
 
   public function treatment_maintance(Request $request)
@@ -26,7 +166,6 @@ class NHIServiceController extends Controller
     $treatment_lists = $db->table('nhiservice_treatment')
       ->orderBy('category')
       ->orderBy('short_code');
-      // 分類 caseType -> areaName
     $treatment_list = $treatment_lists->get()->groupBy(['category']);
 
     // dd($treatment_list->toArray());

@@ -6,12 +6,16 @@
 <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"></script>
 <!-- Bootstrap 5 -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
 <!-- Bootstrap core JavaScript-->
 <script src="{{ asset('js/select2.min.js') }}"></script>
 <script src="{{ asset('js/bootstrap.bundle.min.js') }}"></script>
 <!-- Core plugin JavaScript-->
 <script src="{{ asset('js/jquery.easing.min.js') }}"></script>
 <script src="{{ asset('js/jquery.datetimepicker.js') }}"></script>
+<script src="{{ asset('js/jquery.dataTables.min.js') }}"></script>
+<script src="{{ asset('js/dataTables.bootstrap5.min.js') }}"></script>
+
 <!-- <script src="js/formValidationInit.js"></script>
 <script src="js/validationEngineLang.zh-TW.custom.js"></script> -->
 <!-- Custom scripts for all pages-->

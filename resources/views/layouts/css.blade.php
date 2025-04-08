@@ -10,7 +10,8 @@
   <link rel="stylesheet" type="text/css" href="/app/fontawesome/css/all.min.css">
   <link rel="stylesheet" href="{{ asset('css/sb-admin-2.min.css') }}">
   <link rel="stylesheet" href="{{ asset('css/select2.min.css') }}">
-  <link rel='stylesheet' type="text/css" href="{{ asset('css/jquery.datetimepicker.css') }}" />
+  <link rel="stylesheet" type="text/css" href="{{ asset('css/dataTables.bootstrap5.min.css') }}" />
+  <link rel="stylesheet" type="text/css" href="{{ asset('css/jquery.datetimepicker.css') }}" />
   <!-- <link rel='stylesheet' type="text/css" href='css/validationEngine.jquery.css' /> -->
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css">
@@ -25,6 +26,14 @@
       width: 20px !important;
       height: 20px !important;
       vertical-align: middle; /* 保持與文字垂直對齊 */
+    }
+    .select2-container .select2-selection--single {
+      height: 38px !important;
+      line-height: 38px !important;
+    }
+
+    .select2-container--default .select2-selection--single .select2-selection__rendered {
+      line-height: 38px !important;
     }
     @media print {
       @page {
