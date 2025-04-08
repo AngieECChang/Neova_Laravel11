@@ -115,17 +115,17 @@ class NHIServiceController extends Controller
     $db = DatabaseConnectionService::setConnection($databaseName);
 
     $caseID = $request->input('firmID'); //個案
-    $shift = $request->input('shift'); //申報補件
-    $A17 = $request->input('A17'); //就診日期
-    $A12 = $request->input('A12'); //	身分證號
-    $A13 = $request->input('A13'); //出生日期
-    $A23 = $request->input('A23'); //就診類別
-    $D1 = $request->input('D1'); //案件分類
-    $D4 = $request->input('D4'); //特療項目1
-    $D8 = $request->input('D8'); //就醫科別
-    $night_plus = $request->input('night_plus'); //夜間加成
-    $hospID = $request->input('HospID');
-    $case_type = $request->input('type');
+    $shift = $request->input('shift')??''; //申報補件
+    $A17 = $request->input('A17')??date('Y-m-d H:i:s'); //就診日期
+    $A12 = $request->input('A12')??''; //	身分證號
+    $A13 = $request->input('A13')??''; //出生日期
+    $A23 = $request->input('A23')??''; //就診類別
+    $D1 = $request->input('D1')??''; //案件分類
+    $D4 = $request->input('D4')??''; //特療項目1
+    $D8 = $request->input('D8')??''; //就醫科別
+    $night_plus = $request->input('night_plus')??''; //夜間加成
+    $hospID = $request->input('HospID')??'';
+    $case_type = $request->input('type')??'';
 
     $data = [
       'A00' => '1',
@@ -138,24 +138,25 @@ class NHIServiceController extends Controller
       'caseID' => $caseID,
       'case_type' => $case_type,
       'night_plus' => $night_plus,
-      'A11' => '',
-      'A12' => $A17,
+      'A12' => $A12,
       'A13' => $A13,
       'A14' => $hospID,
       'A17' => $A17,
-      'A18' => '',
       'A19' => '',
       'A23' => $A23,
       'shift' => $shift,
       'D1' => $D1,
       'D4' => $D4,
       'D8' => $D8,
-      'created_by' => session('user_id'),
+      'created_by' => session('user_id')
     ];
+    try {
+      $insert = $db->table('nhiservice01')->insert($data);
+      return redirect()->back()->with('success', '資料已成功儲存');
 
-    $insert = $db->table('nhiservice01')->insert($data);
-
-    return redirect()->back()->with('success', '資料已成功儲存');
+    } catch (\Exception $e) {
+      return response()->json(['success' => false,'message' => '伺服器錯誤：' . $e->getMessage()], 500);
+    }
   }
 
   public function treatment_maintance(Request $request)

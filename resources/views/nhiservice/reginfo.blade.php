@@ -221,8 +221,14 @@
 				type: 'POST',
 				data: $(this).serialize(),
 				success: function(response) {
-					// 儲存成功，關掉當前視窗
-					window.close();
+					if (window.opener && !window.opener.closed) {
+					const openerUrl = new URL(window.opener.location.href);
+					const startdate = openerUrl.searchParams.get("startdate");
+					const enddate = openerUrl.searchParams.get("enddate");
+					//重導主視窗，保有參數
+					window.opener.location.href = `/nhiservice/registration?startdate=${startdate}&enddate=${enddate}`;
+				}
+				window.close();
 				}
 			});
 		});
