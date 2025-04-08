@@ -26,7 +26,9 @@ Route::middleware(['auth.session'])->group(function () {
   Route::get('/dashboard', function () {
       return view('dashboard');
   })->name('dashboard');
+  //權限表單選單頁面
   Route::get('/layouts/{subcateID}', [\App\Http\Controllers\FormController::class, 'show_list'])->name('layouts.formoptions');
+  //居護個案->收案、結案
   Route::get('/hc-openlist', [HCListController::class, 'HC_Openlist'])->name('hc-openlist');
   Route::get('/hc-create', [HCListController::class, 'HC_Create'])->name('hc-create');
   Route::get('/hc-closelist', [HCListController::class, 'HC_Closelist'])->name('hc-closelist');
@@ -37,15 +39,20 @@ Route::middleware(['auth.session'])->group(function () {
   Route::post('/close-case/{id}', [CaseController::class, 'case_close'])->name('hc-case_close');
   Route::post('/reopen-case/{id}', [CaseController::class, 'reopen_case']);
   Route::post('/delete-close/{id}', [CaseController::class, 'delete_close'])->name('hc-delete_close');
+  //居護個案->表單
   Route::get('/get-evaluation-dates/{formID}/{caseID}', [EvaluationController::class, 'getEvaluationDates']);
   Route::get('/hcevaluation/{formID}/{caseID}/{date?}', [EvaluationController::class, 'showEvaluationForm'])->name('hcevaluation.edit');  //{date?} → date 是可選的，如果沒有日期，就顯示「無紀錄的表單」
   Route::get('/icd/lookup', [\App\Http\Controllers\ICDController::class, 'lookup'])->name('icd.lookup');
   Route::get('/print/hcevaluation/{formID}/{caseID}/{date?}', [EvaluationController::class, 'print'])->name('hcevaluation.print');
   Route::post('/hcevaluation/save', [EvaluationController::class, 'save'])->name('hcevaluation.save');
+  //居護人事
   Route::get('/personnel/employeelist', [EmployeeListController::class, 'showlist']);
   Route::get('/personnel/{formID}/{employeeID}', [EmployeeListController::class, 'showForm']);
-  Route::get('/nhiservice/registration', [NHIServiceController::class, 'registration_list'])->name('registration_list'); //健保掛號列表
-  Route::get('/nhiservice/reginfo/{REGID?}', [NHIServiceController::class, 'reginfo'])->name('reginfo'); //健保掛號
+  //居護健保
+  Route::get('/nhiservice/registration', [NHIServiceController::class, 'registration_list'])->name('registration_list'); 
+  Route::get('/nhiservice/reginfo/{REGID?}', [NHIServiceController::class, 'reginfo'])->name('reginfo'); 
+  Route::post('/get-case-reginfo', [NHIServiceController::class, 'getCaseReginfo'])->name('get-case-reginfo');
+  Route::post('/nhiservice/reginfo/save', [NHIServiceController::class, 'save_reginfo'])->name('reginfo.save'); 
 
   Route::get('/nhiservice/treatment_maintain', [NHIServiceController::class, 'treatment_maintance'])->name('treatment_maintance'); //健保處置代碼列表
   Route::post('/newtreatment', [NHIServiceController::class, 'new_treatment'])->name('new_treatment');
@@ -56,6 +63,9 @@ Route::middleware(['auth.session'])->group(function () {
   Route::get('/nhiservice/treatment_set_page/{set_id?}', [NHIServiceController::class, 'treatment_set_edit'])->name('nhiservice.treatment_set_edit');
   Route::post('/nhiservice/treatment_set_page/save', [NHIServiceController::class, 'save_treatment_set'])->name('treatment_set_save');
   Route::post('/delete_treatment_set/{set_id}', [NHIServiceController::class, 'delete_treatment_set'])->name('delete_treatment_set');
+  //居護行政
+  Route::get('/hcmanagement/{formID}', [\App\Http\Controllers\HCManagementController::class, 'showForm'])->name('hcmanagement.edit');
+  Route::post('/hcmanagement', [\App\Http\Controllers\HCManagementController::class, 'saveForm'])->name('hcmanagement.save');
 });
 
 
