@@ -14,6 +14,7 @@
 </style>
 @php
   $patient_type = config('public.hc_patient_type');
+	$citizen_status_array = config('public.citizen_status');
 	$startdate = request('startdate');
 	$enddate = request('enddate');
 @endphp
@@ -29,7 +30,7 @@
 								<th class="table-success align-middle" style="width: 10%">申報補件</th>
 								<td style="width: 40%">
 									<div class="form-check form-check-inline">
-										<input class="form-check-input radio" type="radio" name="shift" id="shift0" value="" {{ optional($result)->shift == '' ? 'checked' : '' }}>
+										<input class="form-check-input radio" type="radio" name="shift" id="shift0" value="0" {{ optional($result)->shift == '0' ? 'checked' : '' }}>
 										<label class="form-check-label" for="shift0">否</label>
 									</div>
 									<div class="form-check form-check-inline">
@@ -61,7 +62,16 @@
 									<select name="firmID" id="firmID" class="form-control" {{ (optional($result)->caseID!=""? 'disabled':'') }}>
 										<option value="">請選擇</option>
 										@foreach ($open_cases as $case)
-										<option value="{{ $case->caseID }}" data-birth="{{ $case->birthdate }}" data-idno="{{ $case->IdNo }}" data-type="{{ $case->case_type }}" {{ optional($result)->caseID == $case->caseID ? 'selected' : '' }}>
+											@php
+												$case_status = (!empty($cases_latest_baseform[$case->caseID])?$cases_latest_baseform[$case->caseID]['citizen_status']:'');
+												$case_status_other = (!empty($cases_latest_baseform[$case->caseID])?$cases_latest_baseform[$case->caseID]['citizen_status_other']:'');
+												if($case_status!=""){
+													$the_case_status = $citizen_status_array[$case_status].($case_status_other!=""?' '.$case_status_other:'');
+												}else{
+													$the_case_status = '尚未指定身分別';
+												}
+											@endphp
+										<option value="{{ $case->caseID }}" data-birth="{{ $case->birthdate }}" data-idno="{{ $case->IdNo }}" data-type="{{ $case->case_type }}" data-case_status="{{ $the_case_status }}" {{ optional($result)->caseID == $case->caseID ? 'selected' : '' }}>
 											{{ "【".(string)$case->caseNoDisplay."】".$case->name." (".($patient_type[$case->case_type]??'').")" }}
 										</option>
 										@endforeach
@@ -81,7 +91,7 @@
 							</tr>
 							<tr>
 								<th class="table-success align-middle">身份別</th>
-								<td><span id="QillnessType"></span></td>
+								<td><span id="citizen_status"></span></td>
 								<th class="table-success align-middle">就醫科別</th>
 								<td>
 									<select name="D8" id="D8" class="form-control">
@@ -178,12 +188,14 @@
       let birthdate = selectedOption.data('birth');
       let IdNo = selectedOption.data('idno');
 			let type = selectedOption.data('type');
+			let case_status = selectedOption.data('case_status');
 			let firmID = $(this).val();
 
 			$("#caseID").val(firmID);
 			$("#A13").val(birthdate);
 			$("#A12").val(IdNo);
 			$("#type").val(type);
+			$("#citizen_status").html(case_status);
 			// 呼叫後端 API 查詢上次紀錄
 			if (firmID) {
 				$.ajax({

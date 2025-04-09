@@ -37,10 +37,22 @@ class CaseDataMiddleware
       ->orderBy('b.caseNoDisplay')
       ->get();
 
-    // $open_cases_arrayinfo = $open_cases->pluck('areaName', 'areaID')->toArray();
+      $subquery = $db->table('hcevaluation01')
+      ->select('caseID', $db->raw('MAX(date) as latest'))
+      ->groupBy('caseID');
+
+      $latest_baseform = $db->table('hcevaluation01 as e')
+        ->joinSub($subquery, 'latest_eval', function ($join) {
+            $join->on('e.caseID', '=', 'latest_eval.caseID')
+                ->on('e.date', '=', 'latest_eval.latest');
+        })
+        ->get()
+        ->keyBy('caseID');  //用 caseID 當作 key
+      $latest_baseform = $latest_baseform->map(fn($item) => (array) $item)->toArray();
 
     // 共享數據到所有視圖
     View::share('open_cases', $open_cases);
+    View::share('cases_latest_baseform', $latest_baseform);
     return $next($request);
   }
 }
