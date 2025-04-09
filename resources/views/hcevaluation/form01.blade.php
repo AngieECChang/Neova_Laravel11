@@ -187,6 +187,23 @@
             </td>
           </tr>
           <tr>
+            @php
+              $citizen_status = array("1"=>"一般","2"=>"榮民","3"=>"中低收入戶","4"=>"低收入戶","5"=>"榮民/眷","6"=>"重大傷病","7"=>"福保","8"=>"農保","9"=>"原住民","10"=>"其他");
+            @endphp
+            <th class="table-success">身分別</th>
+            <td colspan="6">
+              <div class="form-check form-check-inline">
+                @foreach($citizen_status as $key => $value)
+                  <div class="form-check form-check-inline">
+                    <input class="form-check-input radio" type="radio" name="citizen_status" id="citizen_status{{$key}}" value="{{$key}}" {{ optional($result)->citizen_status == $key ? "checked" : "" }}>
+                    <label class="form-check-label" for="citizen_status{{$key}}"> {{$value}} </label>
+                  </div>
+                @endforeach
+                <input type="text" class="form-control input-150" name="citizen_status_other" value="{{ optional($result)->citizen_status_other }}">
+              </div>
+            </td>
+          </tr>
+          <tr>
             <th class="table-success">教育程度</th>
             <td colspan="6">
               <div class="form-check form-check-inline">
