@@ -26,8 +26,8 @@ class NHIServiceController extends Controller
     $databaseName = session('DB'); // 可根據條件動態變更
     $db = DatabaseConnectionService::setConnection($databaseName);
 
-    $start_date = $request->input('startdate')??date("Y-m-01");
-    $end_date = $request->input('enddate')?? date("Y-m-t");
+    $start_date = $request->input('startdate')??date("Y-m-d");
+    $end_date = $request->input('enddate')?? date("Y-m-d");
 
     $start_datetime = $start_date . ' 00:00:00';
     $end_datetime = $end_date . ' 23:59:59';
@@ -36,8 +36,7 @@ class NHIServiceController extends Controller
       ->leftJoin('nhiservice02 as b', 'a.REGID', '=', 'b.REGID')
       ->leftJoin('cases as c', 'a.caseID', '=', 'c.caseID')
       ->select(
-          'a.*',
-          'b.*',
+          'a.*',        
           'c.name',
         )
       ->whereBetween('a.A17', [$start_datetime, $end_datetime])
@@ -107,6 +106,197 @@ class NHIServiceController extends Controller
   }
 
   public function save_reginfo(Request $request)
+  {
+    $databaseName = session('DB'); // 可根據條件動態變更
+    $db = DatabaseConnectionService::setConnection($databaseName);
+
+    $caseID = $request->input('firmID'); //個案
+    $shift = $request->input('shift')??''; //申報補件
+    $A17 = $request->input('A17')??date('Y-m-d H:i:s'); //就診日期
+    $A12 = $request->input('A12')??''; //	身分證號
+    $A13 = $request->input('A13')??''; //出生日期
+    $A23 = $request->input('A23')??''; //就診類別
+    $D1 = $request->input('D1')??''; //案件分類
+    $D4 = $request->input('D4')??''; //特療項目1
+    $D8 = $request->input('D8')??''; //就醫科別
+    $night_plus = $request->input('night_plus')??''; //夜間加成
+    $hospID = $request->input('HospID')??'';
+    $case_type = $request->input('type')??'';
+
+    $data = [
+      'A00' => '1',
+      'A01' => '2',  //異常上傳(無卡掛號)
+      'A02' => '1.0',
+      't5' => '1',
+      'A99' => '1',
+      'finished' => '0',
+      'status' => '1',
+      'caseID' => $caseID,
+      'case_type' => $case_type,
+      'night_plus' => $night_plus,
+      'A12' => $A12,
+      'A13' => $A13,
+      'A14' => $hospID,
+      'A17' => $A17,
+      'A19' => '',
+      'A23' => $A23,
+      'shift' => $shift,
+      'D1' => $D1,
+      'D4' => $D4,
+      'D8' => $D8,
+      'created_by' => session('user_id')
+    ];
+    try {
+      $insert = $db->table('nhiservice01')->insert($data);
+      return redirect()->back()->with('success', '資料已成功儲存');
+
+    } catch (\Exception $e) {
+      return response()->json(['success' => false,'message' => '伺服器錯誤：' . $e->getMessage()], 500);
+    }
+  }
+
+  public function consultationShow(Request $request, $REGID, $caseID)
+  {
+    $databaseName = session('DB'); // 可根據條件動態變更
+    $db = DatabaseConnectionService::setConnection($databaseName);
+    
+    if($REGID!=""){
+      $result = $db->table('nhiservice01 as a')
+        ->leftJoin('nhiservice02 as b', 'a.REGID', '=', 'b.REGID')
+        ->where('a.REGID', $REGID)
+        ->first();
+    } else {
+      $columns1 = Schema::getColumnListing('nhiservice01');
+      $columns2 = Schema::getColumnListing('nhiservice02');
+
+      $allColumns = array_unique(array_merge($columns1, $columns2));
+
+      $resultArray = array_fill_keys($allColumns, '');
+      $result = (object) $resultArray;
+    }
+
+    if($caseID!=""){
+      $case_data = $db->table('cases')
+      ->where('caseID', $caseID)
+      ->first();
+
+      $latest_baseform = $db->table('hcevaluation01')
+      ->where('caseID', $caseID)
+      ->orderByDesc('date')
+      ->first();
+    }
+
+    if(!$latest_baseform){
+      $latest_baseform = (object)array_fill_keys(\Schema::getColumnListing('hcevaluation01'), null);
+    }
+
+    // dd($registration_list);
+    return view('nhiservice.consultation', compact('result','case_data', 'latest_baseform'));
+  }
+
+  public function getMajorillness($caseID)
+  {
+    $databaseName = session('DB'); // 可根據條件動態變更
+    $db = DatabaseConnectionService::setConnection($databaseName);
+
+    $record = $db->table('nhiservice_case_card')
+      ->where('caseID', $caseID)
+      ->first();
+
+    if (!$record) {
+      return response()->json([]);
+    }
+
+    $result = [];
+
+    for ($i = 1; $i <= 6; $i++) {
+      $code = $record->{'Criticalillness_Code' . $i};
+      $start = $record->{'Criticalillness_startdate' . $i};
+      $end = $record->{'Criticalillness_enddate' . $i};
+
+      if (!empty($code) || !empty($start)) {
+        $result[] = [
+          'group' => $i,
+          'code' => $code,
+          'start' => $start,
+          'end' => $end,
+        ];
+      }
+    }
+
+    return response()->json($result);
+  }
+
+  public function searchHistory(Request $request)
+  {
+    $databaseName = session('DB'); // 可根據條件動態變更
+    $db = DatabaseConnectionService::setConnection($databaseName);
+
+    $caseID = $request->caseID;
+    $start = $request->startdate;
+    $end = $request->enddate;
+
+    $records = $db->table('nhiservice01 as a')
+        ->join('nhiservice02 as b', 'a.REGID', '=', 'b.REGID')
+        ->where('a.caseID', $caseID)
+        ->where('a.status','!=', '9')
+        ->where('a.A23','!=', 'ZB')
+        ->whereBetween('a.A17', [$start, $end])
+        ->select('a.REGID', 'a.A17', 'a.A23', $db->raw("GROUP_CONCAT(b.A73 SEPARATOR ' / ') as summary"))
+        ->groupBy('a.REGID', 'a.A17')
+        ->orderBy('a.A17', 'desc')
+        ->get();
+
+    return response()->json($records);
+  }
+
+  // public function selectHistory(Request $request)
+  // {
+  //   $regID = $request->rID;
+
+  //   // 模擬回傳資料
+  //   $html = '<span>模擬醫令：XXX</span>';
+  //   $fileCount = 3;
+
+  //   return response()->json([
+  //       'html' => $html,
+  //       'fileCount' => $fileCount,
+  //   ]);
+  // }
+
+  public function searchNhiCode(Request $request)
+  {
+    $databaseName = session('DB'); // 可根據條件動態變更
+    $db = DatabaseConnectionService::setConnection($databaseName);
+
+    $term = $request->input('term');
+
+    $results = $db->table('nhiservice_treatment')
+      ->where('start_date','<=', now())
+      ->where('end_date','>=', now())
+      ->where('category','!=', '99')
+      ->where(function ($query) use ($term) {
+        $query->where('short_code', 'like', "$term%")
+              ->orWhere('treatment_code', 'like', "$term%");
+        })
+      ->limit(10)
+      ->get()
+      ->map(function ($item) {
+          return [
+              'label' => $item->treatment_code . ' ' . $item->treatment_name_zh,
+              'short_code' => $item->short_code,
+              'code' => $item->treatment_code,
+              'name'  => $item->treatment_name_zh,
+              'point' => $item->points,
+              'category' => $item->category,
+              'group'=> $item->group,
+              'treatment_id'=> $item->id
+          ];
+      });
+    return response()->json($results);
+  }
+
+  public function save_consultation(Request $request)
   {
     $databaseName = session('DB'); // 可根據條件動態變更
     $db = DatabaseConnectionService::setConnection($databaseName);

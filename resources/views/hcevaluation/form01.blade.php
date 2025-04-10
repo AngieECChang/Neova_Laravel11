@@ -677,8 +677,8 @@
   });
 
   function clearDiag(index) {
-    $('#diag_${index}_ICD10').val(null).trigger('change');
-    $('#diag_${index}_ICD10name').val('');
+    $(`#diag_${index}_ICD10`).val('');
+    $(`#diag_${index}_ICD10name`).val('');
   }
 </script>
 @endsection

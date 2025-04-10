@@ -50,9 +50,17 @@ Route::middleware(['auth.session'])->group(function () {
   Route::get('/personnel/{formID}/{employeeID}', [EmployeeListController::class, 'showForm']);
   //居護健保
   Route::get('/nhiservice/registration', [NHIServiceController::class, 'registration_list'])->name('registration_list'); 
-  Route::get('/nhiservice/reginfo/{REGID?}', [NHIServiceController::class, 'reginfo'])->name('reginfo'); 
+  Route::get('/nhiservice/reginfo/{REGID?}', [NHIServiceController::class, 'reginfo'])->name('reginfo.edit'); 
   Route::post('/get-case-reginfo', [NHIServiceController::class, 'getCaseReginfo'])->name('get-case-reginfo');
   Route::post('/nhiservice/reginfo/save', [NHIServiceController::class, 'save_reginfo'])->name('reginfo.save'); 
+
+  Route::get('/nhiservice/consultation/{REGID?}/{caseID?}', [NHIServiceController::class, 'consultationShow'])->name('consultation.edit');
+  Route::get('/get_consultation_major/{caseID}', [NHIServiceController::class, 'getMajorillness'])->name('getMajorillness');
+  Route::get('/get_history_orders', [NHIServiceController::class, 'searchHistory']);
+  Route::get('/nhi-code-search', [NHIServiceController::class, 'searchNhiCode']);
+  Route::post('/nhiservice/consultation/save', [NHIServiceController::class, 'save_consultation'])->name('consultation.save'); 
+
+  // Route::post('/select-history-order', [NHIServiceController::class, 'selectHistory']);
 
   Route::get('/nhiservice/treatment_maintain', [NHIServiceController::class, 'treatment_maintance'])->name('treatment_maintance'); //健保處置代碼列表
   Route::post('/newtreatment', [NHIServiceController::class, 'new_treatment'])->name('new_treatment');

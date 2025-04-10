@@ -41,18 +41,17 @@
       </div>
     </div>
   </div>
-
-  <div class="col-6 col-md-6 d-flex justify-content-end">
+  <div class="col-8 col-md-8 d-flex justify-content-end">
     <form method="GET" class="d-flex align-items-center gap-2">
       <div class="card mb-2" style="width: auto;margin-right:25px !important;">
         <div class="card-header text-white" style="background-color:#4e73df !important;">
           日期區間
         </div>
-        <div class="card-body d-flex align-items-center gap-3 p-3">
-          <input type="text" name="startdate" value="{{ request('startdate') }}" class="form-control datepick" style="width: 120px;" autocomplete="off">
+        <div class="card-body d-flex align-items-center gap-3 p-3" style="background-color:	#D2E9FF">
+          <input type="text" name="startdate" value="{{ request('startdate')??date('Y-m-d') }}" class="form-control datepick" style="width: 120px;" autocomplete="off">
           <span class="mx-1">~</span>
-          <input type="text" name="enddate" value="{{ request('enddate') }}" class="form-control datepick" style="width: 120px;margin-right:15px !important;" autocomplete="off">
-          <button type="submit" class="btn btn-outline-primary btn-sm">查詢</button>
+          <input type="text" name="enddate" value="{{ request('enddate')??date('Y-m-d') }}" class="form-control datepick" style="width: 120px;margin-right:15px !important;" autocomplete="off">
+          <button type="submit" class="btn btn-outline-primary">查詢</button>
         </div>
       </div>
     </form>
@@ -61,14 +60,14 @@
         <div class="card-header bg-success text-white">
             掛號作業
         </div>
-        <div class="card-body d-flex align-items-center gap-3 p-3">
-          <a href="{{ route('reginfo.edit', ['action' => 'new']) }}" class="btn text-black" style="background-color: #BBFFBB; border-color: #009100;margin-right:25px !important;" target="_blank">無卡掛號</a>
-          <button type="button" class="btn text-black" style="background-color: #BBFFBB; border-color: #009100;" onclick="window.location.href='UARK://newreg//0117//{{ session('nOrgID') }}//{{ request('pid') }}////';">讀卡掛號</button>
+        <div class="card-body d-flex align-items-center gap-3 p-3" style="background-color:#F0FFF0">
+          <a href="{{ route('reginfo.edit', ['action' => 'new']) }}" class="btn text-black" style="background-color: #96FED1; border-color: #009100;margin-right:25px !important;" target="_blank">無卡掛號</a>
+          <button type="button" class="btn text-black" style="background-color: #96FED1; border-color: #009100;" onclick="window.location.href='UARK://newreg//0117//{{ session('nOrgID') }}//{{ request('pid') }}////';">讀卡掛號</button>
         </div>
       </div>
     </form>
   </div>
-  <div class="col-5 col-md-4">
+  <div class="col-3 col-md-2">
     <div class="d-flex flex-wrap align-items-center justify-content-between gap-2">
       <div class="d-flex align-items-center gap-2 flex-wrap">
         <form>
@@ -76,9 +75,8 @@
             <div class="card-header text-white" style="background-color:#f6c23e !important;">
                 看診作業
             </div>
-            <div class="card-body d-flex align-items-center gap-3 p-3">
-              <a href="{{ route('reginfo.edit') }}" class="btn text-black" style="background-color: #FFFFB9; border-color: #FFD306	;margin-right:25px !important;" target="_blank">無卡看診</a>
-              <button type="button" class="btn text-black" style="background-color: #FFFFB9; border-color: #FFD306;" onclick="window.location.href='UARK://newreg//0117//{{ session('nOrgID') }}//{{ request('pid') }}////';">讀卡看診</button>
+            <div class="card-body d-flex align-items-center gap-3 p-3" style="background-color: #FFFCEC">
+              <button type="button" class="btn text-black" style="background-color:rgb(247, 247, 184); border-color: #FFD306;" onclick="window.location.href='UARK://newreg//0117//{{ session('nOrgID') }}//{{ request('pid') }}////';">讀卡看診</button>
             </div>
           </div>
         </form>
@@ -91,7 +89,7 @@
 <div class="tab-pane fade show active" id="content-all" role="tabpanel">
     @if ($registration_list->isEmpty()) 
       <div class="alert alert-warning text-center mt-3">
-        🚨 目前沒有任何個案
+        🚨 今日尚無 掛號/看診 個案
       </div>
     @else
       <div class="card shadow-sm mb-4">
@@ -132,22 +130,65 @@
                   $show_xmlupload .= ( $value->shift!=''?'<br>申報補件不需上傳':'');
                   $show_A18 = ($value->owed=="1" && $value->A18==""?"<font color='red'>欠卡</font>": $value->A18);
 
-                  if ($value->status == '9' || $value->A23 == "ZB") {
-                    $url = route('reginfo.edit', ['REGID' => $value->REGID, 'action' => 'view', 'startdate' => request('startdate'), 'enddate' => request('enddate')]);
-                    $show_reg = "<a href=\"{$url}\">已取消掛號</a>";
+                  preg_match('/[0-9]{4}/', $value->A18, $Match_array);
+
+                  $editUrl = route('reginfo.edit', ['REGID' => $value->REGID, 'action' => 'edit', 'startdate' => request('startdate'), 'enddate' => request('enddate')]);
+                  $deleteUrl = route('reginfo.edit', ['REGID' => $value->REGID, 'action' => 'delete', 'startdate' => request('startdate'), 'enddate' => request('enddate')]);
+                  $viewUrl = route('reginfo.edit', ['REGID' => $value->REGID, 'action' => 'view', 'startdate' => request('startdate'), 'enddate' => request('enddate')]);
+                  $cardviewUrl = route('consultation.edit', ['REGID' => $value->REGID, 'caseID' => $value->caseID, 'action' => 'view', 'startdate' => request('startdate'), 'enddate' => request('enddate'), 'nocard' => '1']);
+                  $cardUrl = route('consultation.edit', ['REGID' => $value->REGID, 'caseID' => $value->caseID, 'action' => 'edit', 'startdate' => request('startdate'), 'enddate' => request('enddate'), 'nocard' => '1']);
+
+                  $show_reg = '<div class="d-flex flex-column align-items-center">';
+                  $show_card = '<div class="d-flex flex-column align-items-center">';
+
+                  if ($value->status == '9' || $value->A23 == 'ZB') {
+                      $show_reg .= "<a href=\"{$viewUrl}\">已取消掛號</a>";
+                      if ($value->A23 == 'ZB') {
+                        $show_card .= "<a href=\"{$cardviewUrl}\" class=\"btn btn-warning mb-1\">查看</a>";
+                      }
                   } else {
-                    $url = route('reginfo.edit', ['REGID' => $value->REGID, 'action' => 'edit', 'startdate' => request('startdate'), 'enddate' => request('enddate')]);
-                    $show_reg = "<a href=\"{$url}\"><i class='bi bi-pencil-square fw-bold' style='color: #004B97;font-size:1.5rem !important;'></i></a>";
+                      $show_reg .= "<a href=\"{$editUrl}\" class=\"btn btn-info mb-1\">編輯</a>";
+
+                      if ($value->finished == '0') {
+                          $show_reg .= "<a href=\"{$deleteUrl}\" class=\"btn btn-info\">取消掛號</a>";
+                      } elseif ($value->finished == '1') {
+                          preg_match('/[0-9]{4}/', $value->A18, $Match_array);
+                          if ($value->status == '2') {
+                              if ($value->A23 == 'AH') {
+                                  // AH 退掛處理
+                              } elseif ($value->A23 == '01') {
+                                  // 01 退掛處理
+                              }
+                          } elseif (count($Match_array) == 0) {
+                              $show_reg .= "<a href=\"{$deleteUrl}\" class=\"btn btn-danger\" style=\"background-color:#FF9797\">異常，取消</a>";
+                          }
+                      }
+
+                      // 顯示讀卡按鈕
+                      if ($value->A23 != 'ZB' && !(count($Match_array) == 0 && $value->finished == 1 && substr($value->A17, 0, 10) != date("Y-m-d"))) {
+                          $show_card .= "<a href=\"#\" class=\"btn btn-warning mb-1\">讀卡</a>";
+                      }
+
+                      $show_card .= "<a href=\"{$cardUrl}\" class=\"btn btn-warning mb-1\">無卡</a>";
+                  }
+
+                  $show_reg .= '</div>';
+                  $show_card .= '</div>';
+                  
+                  
+
+                  if($value->A19==2){
+                    $show_A19 = "<br><font color='#ff69b4'>(補 ".$oldDate ." 看診)</font>";
+                  }else{
+                    $show_A19 = "";
                   }
                 @endphp
               <tr>
                 <td class="text-center">
-                  @php
-                    echo $show_reg;
-                  @endphp
+                  {!! $show_reg !!}
                 </td>
-                <td class="text-center"></td>
-                <th class="text-center">{{ $value->A17.($value->A19==2?"<br><font color='#ff69b4'>(補 ".$oldDate ." 看診)":"") }}</th>
+                <td class="text-center">{!! $show_card !!}</td>
+                <th class="text-center">{{ $value->A17}}{!! $show_A19 !!}</th>
                 <th class="text-center">{!! $show_A18 !!}</th>
                 <th class="text-center">{{ $value->A23 }}</th>
                 <th class="text-center">{{ $value->name }}</th>
